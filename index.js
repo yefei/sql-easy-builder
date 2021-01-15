@@ -3,28 +3,47 @@
 const sqlWhereBuilder = require('sql-where-builder');
 
 class Raw {
+  /**
+   * @param {string} str
+   */
   constructor(str) {
     this._str = str;
   }
 
+  /**
+   * @returns {string}
+   */
   toString() {
     return this._str;
   }
 }
 
 class Builder {
+  /**
+   * @param {string} [quote='`']
+   */
   constructor(quote = '`') {
     this._quote = quote;
     this._select = [];
+    this._update = [];
     this._from = null;
     this._where = [];
     this._params = [];
+    this._limit = null;
   }
 
+  /**
+   * @param {string} str
+   * @returns {Raw}
+   */
   raw(str) {
     return new Raw(str);
   }
 
+  /**
+   * @param {string|Raw} c
+   * @returns {string}
+   */
   quote(c) {
     if (c === '*') return c;
     if (c instanceof Raw) return c.toString();
@@ -50,6 +69,19 @@ class Builder {
     } else {
       this.select('*');
     }
+    return this;
+  }
+
+  /**
+   * update('user', {
+   *  username: 'xiaohong',
+   *  age: 18,
+   * })
+   * @param {*} table 
+   * @param {*} columns 
+   */
+  update(table, columns) {
+    this._update.push([table, columns]);
     return this;
   }
 
@@ -80,9 +112,7 @@ class Builder {
    * @returns {Builder}
    */
   where(query) {
-    const r = sqlWhereBuilder(query);
-    this._where.push(r.statement);
-    this._params.push(...r.parameters);
+    this._where.push(query);
     return this;
   }
 
@@ -98,12 +128,38 @@ class Builder {
     return this.select(alias ? this.as(count, alias) : count);
   }
 
+  /**
+   * limit(100)
+   * limit(100, 100)
+   * @param {numer} count 
+   * @param {numer} [offset]
+   * @returns {Builder}
+   */
+  limit(count, offset) {
+    this._limit = [count, offset];
+    return this;
+  }
+
+  /**
+   * @returns {[string, any[]]} sql and params
+   */
   build() {
     const sql = [];
-    let params;
+    const params = [];
     if (this._select.length) {
       sql.push('SELECT');
       sql.push(this._select.map(i => this.quote(i)).join(', '));
+    }
+    else if (this._update.length) {
+      sql.push('UPDATE');
+      sql.push(this._update.map(i => this.quote(i[0])).join(', '));
+      sql.push('SET');
+      sql.push(this._update.map(i => {
+        return Object.keys(i[1]).map(k => {
+          params.push(i[1][k]);
+          return `${this.quote(k)} = ?`;
+        }).join(', ');
+      }).join(', '));
     }
     if (this._from) {
       sql.push('FROM');
@@ -111,14 +167,24 @@ class Builder {
     }
     if (this._where.length) {
       sql.push('WHERE');
-      sql.push(this._where.join(' AND '));
-      params = this._params;
+      const _where = [];
+      this._where.forEach(w => {
+        const r = sqlWhereBuilder(w);
+        _where.push(r.statement);
+        params.push(...r.parameters);
+      });
+      sql.push(_where.join(' AND '));
+    }
+    if (this._limit) {
+      sql.push('LIMIT ?');
+      params.push(this._limit[0]);
+      if (this._limit[1]) {
+        sql.push('OFFSET ?');
+        params.push(this._limit[1]);
+      }
     }
     return [sql.join(' '), params];
   }
 }
-
-// console.log(new Builder().select('reg_at', {id: 'USER_ID', name: 'USER_NAME'}).from('user').where({aaa:1, bbb:2}).build());
-// console.log(new Builder().count('id').from('user').where({aaa:1, bbb:2}).build());
 
 module.exports = Builder;
