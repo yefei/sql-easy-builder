@@ -30,6 +30,7 @@ class Builder {
     this._where = [];
     this._params = [];
     this._limit = null;
+    this._one = false;
   }
 
   /**
@@ -138,6 +139,23 @@ class Builder {
   limit(count, offset) {
     this._limit = [count, offset];
     return this;
+  }
+
+  /**
+   * limit 1
+   * @param {number} [offset]
+   */
+  one(offset) {
+    this.limit(1, offset);
+    this._one = true;
+    return this;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  isOne() {
+    return this._one;
   }
 
   /**

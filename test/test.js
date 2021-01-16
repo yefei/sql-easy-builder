@@ -40,6 +40,13 @@ describe('Builder', function() {
     ]);
   });
 
+  it('one', function() {
+    assert.deepStrictEqual(new Builder().select().from('t').one().build(), [
+      'SELECT * FROM `t` LIMIT ?',
+      [1],
+    ]);
+  });
+
   it('count, count as', function() {
     assert.deepStrictEqual(new Builder().count().build(), [
       'SELECT COUNT(*)',
