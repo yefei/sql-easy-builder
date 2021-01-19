@@ -26,6 +26,7 @@ class Builder {
     this._quote = quote;
     this._select = [];
     this._update = [];
+    this._insert = null;
     this._from = null;
     this._where = [];
     this._params = [];
@@ -83,6 +84,11 @@ class Builder {
    */
   update(table, columns) {
     this._update.push([table, columns]);
+    return this;
+  }
+
+  insert(table, columns) {
+    this._insert = [table, columns];
     return this;
   }
 
@@ -178,6 +184,19 @@ class Builder {
           return `${this.quote(k)} = ?`;
         }).join(', ');
       }).join(', '));
+    }
+    else if (this._insert) {
+      sql.push('INSERT INTO');
+      sql.push(this.quote(this._insert[0]));
+      sql.push('(');
+      const _keys = Object.keys(this._insert[1]);
+      sql.push(_keys.map(i => this.quote(i)).join(', '));
+      sql.push(') VALUES (');
+      sql.push(_keys.map(i => {
+        params.push(this._insert[1][i]);
+        return '?';
+      }).join(', '));
+      sql.push(')');
     }
     if (this._from) {
       sql.push('FROM');
