@@ -1,10 +1,39 @@
 
-declare class Raw {
+export declare class Raw {
   constructor(str: string);
   toString(): string;
 }
 
-declare class Builder {
+export declare class Where {
+  constructor(builder: Builder, conjunction?: string);
+  conjunction(c: string): Where;
+  holder(value: string | Raw): string;
+  op(field: string | Raw, op: string, value: string | Raw): Where;
+  or(callback: (w: Where) => Where): Where;
+  in(field: string | Raw, values: (string|Raw)[]): Where;
+  notin(field: string | Raw, values: (string|Raw)[]): Where;
+  between(field: string | Raw, start: string | Raw, end: string | Raw): Where;
+  notbetween(field: string | Raw, start: string | Raw, end: string | Raw): Where;
+  build(): [string, any[]];
+  eq(field: string | Raw, value: string | Raw): Where;
+  ne(field: string | Raw, value: string | Raw): Where;
+  gte(field: string | Raw, value: string | Raw): Where;
+  gt(field: string | Raw, value: string | Raw): Where;
+  lte(field: string | Raw, value: string | Raw): Where;
+  lt(field: string | Raw, value: string | Raw): Where;
+  not(field: string | Raw, value: string | Raw): Where;
+  is(field: string | Raw, value: string | Raw): Where;
+  like(field: string | Raw, value: string | Raw): Where;
+  notlike(field: string | Raw, value: string | Raw): Where;
+  ilike(field: string | Raw, value: string | Raw): Where;
+  notilike(field: string | Raw, value: string | Raw): Where;
+  regexp(field: string | Raw, value: string | Raw): Where;
+  notregexp(field: string | Raw, value: string | Raw): Where;
+  iregexp(field: string | Raw, value: string | Raw): Where;
+  notiregexp(field: string | Raw, value: string | Raw): Where;
+}
+
+export declare class Builder {
   constructor(quote: string);
   clone(): Builder;
   raw(str: string): Raw;
@@ -56,9 +85,10 @@ declare class Builder {
 
   /**
    * where({ username: 'test' }) => WHERE username = ?; ['test']
+   * where(w => w.eq('username', 'test')) => WHERE username = ?; ['test']
    * @param query 
    */
-  where(query: { [key: string]: any }): Builder;
+  where(query: { [key: string]: any } | ((w: Where) => Where)): Builder;
 
   /**
    * func('COUNT', '*') => COUNT(*)
@@ -104,5 +134,3 @@ declare class Builder {
 
   build(): [string, any[]];
 }
-
-export = Builder;

@@ -1,3 +1,7 @@
 'use strict';
 
-module.exports = require('./lib/builder');
+module.exports = {
+  Builder: require('./lib/builder'),
+  Where: require('./lib/where'),
+  Raw: require('./lib/raw'),
+};

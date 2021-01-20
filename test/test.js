@@ -1,9 +1,9 @@
 const assert = require('assert');
-const Builder = require('..');
-const whereBuilder = require('../lib/where');
+const { Builder, Where } = require('..');
+const josnWhere = require('../lib/json_where');
 
 describe('Builder', function() {
-  it('where', function() {
+  it('jsonWhere', function() {
     const builder = new Builder();
     const test = {
       name: 'test',
@@ -23,22 +23,22 @@ describe('Builder', function() {
         notbetween: [1, 100],
       }
     };
-    assert.deepStrictEqual(whereBuilder(builder, test), [
+    assert.deepStrictEqual(josnWhere(builder, test), [
       '`name` = ? AND `age` >= ? AND `bb` IS NULL AND `cc` IS NOT NULL AND `dd` IN (?, ?, ?) AND `ee` NOT IN (?, ?, ?) AND (`or1` = ? OR `or2` = ?) AND `date` BETWEEN ? AND ? AND `date2` NOT BETWEEN ? AND ?',
       ['test', 18, 4, 5, 6, 7, 8, 9, 1, 2, 1, 100, 1, 100]
     ]);
 
-    assert.deepStrictEqual(whereBuilder(builder, { name: 'yf', age: builder.raw('1') }), [
+    assert.deepStrictEqual(josnWhere(builder, { name: 'yf', age: builder.raw('1') }), [
       '`name` = ? AND `age` = 1',
       ['yf']
     ]);
 
-    assert.deepStrictEqual(whereBuilder(builder, { name: 'yf', age: builder.func('NOW') }), [
+    assert.deepStrictEqual(josnWhere(builder, { name: 'yf', age: builder.func('NOW') }), [
       '`name` = ? AND `age` = NOW()',
       ['yf']
     ]);
 
-    assert.deepStrictEqual(whereBuilder(builder, {
+    assert.deepStrictEqual(josnWhere(builder, {
       name: 'yf',
       age: {
         gt: 10,
@@ -49,7 +49,7 @@ describe('Builder', function() {
       ['yf', 10, 50]
     ]);
 
-    assert.deepStrictEqual(whereBuilder(builder, {
+    assert.deepStrictEqual(josnWhere(builder, {
       name: 'yf',
       age: {
         $or: {
@@ -62,7 +62,7 @@ describe('Builder', function() {
       ['yf', 10, 50]
     ]);
 
-    assert.deepStrictEqual(whereBuilder(builder, {
+    assert.deepStrictEqual(josnWhere(builder, {
       gender: 1,
       age: { between: [20, 80] },
       name: { like: '%Jackson%' },
@@ -85,6 +85,14 @@ describe('Builder', function() {
     }), [
       '`gender` = ? AND `age` BETWEEN ? AND ? AND `name` LIKE ? AND `status` > ? AND `status` != ? AND `status` != ? AND (`more` != ? OR `more` = ?) AND (`morein` != ? OR `morein` != ? OR `morein` > ?)',
       [ 1, 20, 80, '%Jackson%', 2, 5, 6, 1, 2, 1, 2, -10 ],
+    ]);
+  });
+
+  it('Where', function() {
+    const builder = new Builder();
+    assert.deepStrictEqual(new Where(builder).eq('username', 'yf').gte('age', 18).build(), [
+      '`username` = ? AND `age` >= ?',
+      ['yf', 18]
     ]);
   });
 
