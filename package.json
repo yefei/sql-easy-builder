@@ -10,9 +10,6 @@
     "lint": "eslint --max-warnings 0",
     "test": "mocha"
   },
-  "dependencies": {
-    "sql-where-builder": "^1.2.1"
-  },
   "devDependencies": {
     "eslint": "^7.17.0",
     "mocha": "^8.2.1"

@@ -1,14 +1,33 @@
 const assert = require('assert');
 const Builder = require('..');
-
-/**
- * @param {(b: Builder) => Builder} callback 
- */
-function builder(callback) {
-  return callback(new Builder()).build();
-}
+const whereBuilder = require('../lib/where');
 
 describe('Builder', function() {
+  it('where', function() {
+    const test = {
+      name: 'test',
+      age: { gte: 18 },
+      bb: null,
+      cc: { not: null },
+      dd: [4,5,6],
+      ee: { notin: [7,8,9] },
+      $or: {
+        or1: 1,
+        or2: 2,
+      },
+      date: {
+        between: [1, 100],
+      },
+      date2: {
+        notbetween: [1, 100],
+      }
+    };
+    assert.deepStrictEqual(whereBuilder(new Builder(), test), [
+      '`name` = ? AND `age` >= ? AND `bb` IS NULL AND `cc` IS NOT NULL AND `dd` IN (?, ?, ?) AND `ee` NOT IN (?, ?, ?) AND (`or1` = ? OR `or2` = ?) AND `date` BETWEEN ? AND ? AND `date2` NOT BETWEEN (?, ?)',
+      ['test', 18, 4, 5, 6, 7, 8, 9, 1, 2, 1, 100, 1, 100]
+    ]);
+  });
+
   it('select', function() {
     const a = new Builder().select('p1', { p2: 'P2', p3: 'P3' });
     assert.deepStrictEqual(a.build(), [
