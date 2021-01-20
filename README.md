@@ -128,3 +128,8 @@ SELECT * FROM `user` WHERE `gender` = ? AND `age` BETWEEN ? AND ? AND `name` LIK
 ```json
 [ 1, 20, 80, "%Jackson%", 2, 5, 6, 1, 2, 1, 2, -10 ]
 ```
+
+## class where
+```js
+select().from('user').where(w => w.eq('gender', 1).between('age', 20, 80).or(w => w.ne('more', 1).eq('more', 2)))
+```
