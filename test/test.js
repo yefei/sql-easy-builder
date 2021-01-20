@@ -1,42 +1,45 @@
 const assert = require('assert');
 const Builder = require('..');
 
+/**
+ * @param {(b: Builder) => Builder} callback 
+ */
+function builder(callback) {
+  return callback(new Builder()).build();
+}
+
 describe('Builder', function() {
-  it('select where limit', function() {
-    const q = new Builder()
-      .select('p1', { p2: 'P2', p3: 'P3' });
-    
-    assert.deepStrictEqual(q.build(), [
+  it('select', function() {
+    const a = new Builder().select('p1', { p2: 'P2', p3: 'P3' });
+    assert.deepStrictEqual(a.build(), [
       'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3`',
       [],
     ]);
-
-    q.from('t');
-    
-    assert.deepStrictEqual(q.build(), [
+    a.from('t');
+    assert.deepStrictEqual(a.build(), [
       'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3` FROM `t`',
       [],
     ]);
-
-    q.where({ a: 1, b: 'str' });
-
-    assert.deepStrictEqual(q.build(), [
+    a.where({ a: 1, b: 'str' });
+    assert.deepStrictEqual(a.build(), [
       'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3` FROM `t` WHERE `a` = ? AND `b` = ?',
       [1, 'str'],
     ]);
-
-    q.limit(100);
-
-    assert.deepStrictEqual(q.build(), [
+    assert.deepStrictEqual(a.clone().limit(100).build(), [
       'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3` FROM `t` WHERE `a` = ? AND `b` = ? LIMIT ?',
       [1, 'str', 100],
     ]);
-
-    q.limit(100, 200);
-
-    assert.deepStrictEqual(q.build(), [
+    assert.deepStrictEqual(a.clone().limit(100, 200).build(), [
       'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3` FROM `t` WHERE `a` = ? AND `b` = ? LIMIT ? OFFSET ?',
       [1, 'str', 100, 200],
+    ]);
+    assert.deepStrictEqual(a.clone().order('id').build(), [
+      'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3` FROM `t` WHERE `a` = ? AND `b` = ? ORDER BY `id` ASC',
+      [1, 'str'],
+    ]);
+    assert.deepStrictEqual(a.clone().order('-t', 'id').build(), [
+      'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3` FROM `t` WHERE `a` = ? AND `b` = ? ORDER BY `t` DESC, `id` ASC',
+      [1, 'str'],
     ]);
   });
 

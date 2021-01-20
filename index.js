@@ -24,14 +24,22 @@ class Builder {
    */
   constructor(quote = '`') {
     this._quote = quote;
-    this._select = [];
-    this._update = [];
-    this._insert = null;
-    this._from = null;
-    this._where = [];
+    this._sql = [];
     this._params = [];
-    this._limit = null;
     this._one = false;
+  }
+
+  /**
+   * clone this
+   * @returns {Builder}
+   */
+  clone() {
+    const b = new Builder();
+    b._quote = this._quote;
+    b._sql = Array.from(this._sql);
+    b._params = Array.from(this._params);
+    b._one = this._one;
+    return b;
   }
 
   /**
@@ -53,42 +61,90 @@ class Builder {
   }
 
   /**
-   * select('id', 'name', { age: 'user_age', id: 'user_id' }, ...)
-   * @param {...string|object} args
+   * append sql
+   * @param {string} sql
    * @returns {Builder}
    */
-  select(...args) {
-    if (args.length) {
-      args.forEach(i => {
-        if (typeof i === 'object' && !(i instanceof Raw)) {
-          Object.keys(i).forEach(k => {
-            this._select.push(this.as(k, i[k]));
-          });
-        } else {
-          this._select.push(i);
-        }
-      });
-    } else {
-      this.select('*');
-    }
+  append(sql) {
+    this._sql.push(sql);
     return this;
   }
 
   /**
-   * update('user', {
-   *  username: 'xiaohong',
-   *  age: 18,
-   * })
-   * @param {*} table 
-   * @param {*} columns 
+   * fields('id', 'name', { age: 'user_age', id: 'user_id' }, ...) => id, name, age as user_age, id as user_id
+   * @param {string[]|{ [key: string]: string }} fields
+   * @returns {Builder}
    */
-  update(table, columns) {
-    this._update.push([table, columns]);
+  fields(fields) {
+    const _fields = [];
+    fields.forEach(i => {
+      if (typeof i === 'object' && !(i instanceof Raw)) {
+        Object.keys(i).forEach(k => {
+          _fields.push(this.as(k, i[k]));
+        });
+      } else {
+        _fields.push(i);
+      }
+    });
+    this.append(_fields.map(i => this.quote(i)).join(', '));
     return this;
   }
 
+  /**
+   * select() => SELECT *
+   * select('id', 'name', { age: 'user_age', id: 'user_id' }, ...) => SELECT id, name, age as user_age, id as user_id
+   * @param {string[]|{ [key: string]: string }} fields
+   * @returns {Builder}
+   */
+  select(...fields) {
+    this.append('SELECT');
+    this.fields(fields.length ? fields : ['*']);
+    return this;
+  }
+
+  /**
+   * update('user', { name: 'yf', age: 18, }) => UPDATE user SET name = ?, age = ?; ['yf', 18]
+   * @param {string|string[]} table 
+   * @param {*} columns
+   */
+  update(table, columns) {
+    this.append('UPDATE');
+    this.append(Array.isArray(table) ? table.map(i => this.quote(i)).join(', ') : this.quote(table));
+    this.append('SET');
+    this.append(Object.keys(columns).map(k => {
+      this._params.push(columns[k]);
+      return `${this.quote(k)} = ?`;
+    }).join(', '));
+    return this;
+  }
+
+  /**
+   * insert('user', { name: 'yf', age: 18, }) => INSERT INTO user (name, age) VALUES (?, ?); ['yf', 18]
+   * @param {string} table
+   * @param {*} columns
+   */
   insert(table, columns) {
-    this._insert = [table, columns];
+    this.append('INSERT INTO');
+    this.append(this.quote(table));
+    this.append('(');
+    const _keys = Object.keys(columns);
+    this.append(_keys.map(i => this.quote(i)).join(', '));
+    this.append(') VALUES (');
+    this.append(_keys.map(i => {
+      this._params.push(columns[i]);
+      return '?';
+    }).join(', '));
+    this.append(')');
+    return this;
+  }
+
+  /**
+   * delete('uset') => DELETE FROM user
+   * @param {string|Raw} table
+   */
+  delete(table) {
+    this.append('DELETE FROM');
+    this.append(this.quote(table));
     return this;
   }
 
@@ -103,47 +159,69 @@ class Builder {
   }
 
   /**
+   * from('t') => FROM t
+   * from('t', 'b') => FROM t AS b
    * @param {string|Raw} name
+   * @param {string|Raw} [alias]
    * @returns {Builder}
    */
-  from(name) {
-    this._from = name;
+  from(name, alias) {
+    this.append('FROM');
+    this.fields([alias ? this.as(name, alias) : name]);
     return this;
   }
 
   /**
-   * where({
-   *  username: 'test'
-   * })
+   * where({ username: 'test' }) => WHERE username = ?; ['test']
    * @param {object} query
    * @returns {Builder}
    */
   where(query) {
-    this._where.push(query);
+    this.append('WHERE');
+    const r = sqlWhereBuilder(query);
+    this.append(r.statement);
+    this._params.push(...r.parameters);
     return this;
   }
 
   /**
-   * count()
-   * count('id')
-   * count('id', 'user_count')
+   * func('COUNT', '*') => COUNT(*)
+   * func('COUNT', '*', 'c') => COUNT(*) AS c
+   * @param {string} name
+   * @param {string|Raw} exp
+   * @param {string} [alias]
+   * @returns {Raw}
+   */
+  func(name, exp, alias) {
+    const f = this.raw(`${name}(${this.quote(exp)})`);
+    return alias ? this.as(f, alias) : f;
+  }
+
+  /**
+   * count() => SELECT COUNT(*)
+   * count('id') => SELECT COUNT(id)
+   * count('id', 'user_count') => SELECT COUNT(id) AS user_count
    * @param {string|Raw} [column='*']
    * @param {string} [alias]
    */
   count(column = '*', alias) {
-    const count = this.raw(`COUNT(${this.quote(column)})`);
-    return this.select(alias ? this.as(count, alias) : count);
+    return this.select(this.func('COUNT', column, alias));
   }
 
   /**
-   * limit(100)
-   * limit(100, 100)
+   * limit(100) => LIMIT 100
+   * limit(100, 100) => LIMIT 100 OFFSET 100
    * @param {numer} count 
    * @param {numer} [offset]
    * @returns {Builder}
    */
   limit(count, offset) {
-    this._limit = [count, offset];
+    this.append('LIMIT ?');
+    this._params.push(count);
+    if (offset !== undefined) {
+      this.append('OFFSET ?');
+      this._params.push(offset);
+    }
     return this;
   }
 
@@ -165,62 +243,26 @@ class Builder {
   }
 
   /**
+   * order('id') => ORDER BY id ASC
+   * order('-id') => ORDER BY id DESC
+   * order('-created_at', '-id') => ORDER BY created_at DESC, id DESC
+   * @param {string[]} fields
+   * @returns {Builder}
+   */
+  order(...fields) {
+    this.append('ORDER BY');
+    this.append(fields.map(f => {
+      const desc = f[0] === '-';
+      return this.quote(desc ? f.substring(1) : f) + (desc ? ' DESC' : ' ASC');
+    }).join(', '));
+    return this;
+  }
+
+  /**
    * @returns {[string, any[]]} sql and params
    */
   build() {
-    const sql = [];
-    const params = [];
-    if (this._select.length) {
-      sql.push('SELECT');
-      sql.push(this._select.map(i => this.quote(i)).join(', '));
-    }
-    else if (this._update.length) {
-      sql.push('UPDATE');
-      sql.push(this._update.map(i => this.quote(i[0])).join(', '));
-      sql.push('SET');
-      sql.push(this._update.map(i => {
-        return Object.keys(i[1]).map(k => {
-          params.push(i[1][k]);
-          return `${this.quote(k)} = ?`;
-        }).join(', ');
-      }).join(', '));
-    }
-    else if (this._insert) {
-      sql.push('INSERT INTO');
-      sql.push(this.quote(this._insert[0]));
-      sql.push('(');
-      const _keys = Object.keys(this._insert[1]);
-      sql.push(_keys.map(i => this.quote(i)).join(', '));
-      sql.push(') VALUES (');
-      sql.push(_keys.map(i => {
-        params.push(this._insert[1][i]);
-        return '?';
-      }).join(', '));
-      sql.push(')');
-    }
-    if (this._from) {
-      sql.push('FROM');
-      sql.push(this.quote(this._from));
-    }
-    if (this._where.length) {
-      sql.push('WHERE');
-      const _where = [];
-      this._where.forEach(w => {
-        const r = sqlWhereBuilder(w);
-        _where.push(r.statement);
-        params.push(...r.parameters);
-      });
-      sql.push(_where.join(' AND '));
-    }
-    if (this._limit) {
-      sql.push('LIMIT ?');
-      params.push(this._limit[0]);
-      if (this._limit[1]) {
-        sql.push('OFFSET ?');
-        params.push(this._limit[1]);
-      }
-    }
-    return [sql.join(' '), params];
+    return [this._sql.join(' '), this._params];
   }
 }
 
