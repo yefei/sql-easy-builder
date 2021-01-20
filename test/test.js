@@ -4,6 +4,7 @@ const whereBuilder = require('../lib/where');
 
 describe('Builder', function() {
   it('where', function() {
+    const builder = new Builder();
     const test = {
       name: 'test',
       age: { gte: 18 },
@@ -22,9 +23,19 @@ describe('Builder', function() {
         notbetween: [1, 100],
       }
     };
-    assert.deepStrictEqual(whereBuilder(new Builder(), test), [
+    assert.deepStrictEqual(whereBuilder(builder, test), [
       '`name` = ? AND `age` >= ? AND `bb` IS NULL AND `cc` IS NOT NULL AND `dd` IN (?, ?, ?) AND `ee` NOT IN (?, ?, ?) AND (`or1` = ? OR `or2` = ?) AND `date` BETWEEN ? AND ? AND `date2` NOT BETWEEN (?, ?)',
       ['test', 18, 4, 5, 6, 7, 8, 9, 1, 2, 1, 100, 1, 100]
+    ]);
+
+    assert.deepStrictEqual(whereBuilder(builder, { name: 'yf', age: builder.raw('1') }), [
+      '`name` = ? AND `age` = 1',
+      ['yf']
+    ]);
+
+    assert.deepStrictEqual(whereBuilder(builder, { name: 'yf', age: builder.func('NOW') }), [
+      '`name` = ? AND `age` = NOW()',
+      ['yf']
     ]);
   });
 
