@@ -72,3 +72,43 @@ params:
 ```json
 [18]
 ```
+
+## where operator
+```js
+{
+  eq: '=',
+  ne: '!=',
+  gte: '>=',
+  gt: '>',
+  lte: '<=',
+  lt: '<',
+  not: 'IS NOT',
+  is: 'IS',
+  in: 'IN',
+  notin: 'NOT IN',
+  like: 'LIKE',
+  notlike: 'NOT LIKE',
+  ilike: 'ILIKE',
+  notilike: 'NOT ILIKE',
+  regexp: '~',
+  notregexp: '!~',
+  iregexp: '~*',
+  notiregexp: '!~*',
+  between: 'BETWEEN',
+  notbetween: 'NOT BETWEEN',
+}
+```
+
+```js
+select().from('user').where({
+  gender: 1,
+  age: { between: [20, 80] },
+  name: { like: '%Jackson%' },
+})
+```
+```SQL
+SELECT * FROM `user` WHERE `gender` = ? AND `age` BETWEEN ? AND ? AND `name` LIKE ?;
+```
+```json
+[1, 20, 80, "%Jackson%"]
+```
