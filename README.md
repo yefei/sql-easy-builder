@@ -104,11 +104,27 @@ select().from('user').where({
   gender: 1,
   age: { between: [20, 80] },
   name: { like: '%Jackson%' },
+  status: {
+    gt: 2,
+    ne: [5, 6],
+  },
+  more: {
+    $or: {
+      ne: 1,
+      eq: 2,
+    }
+  },
+  morein: {
+    $or: {
+      ne: [1, 2],
+      gt: -10,
+    }
+  }
 })
 ```
 ```SQL
-SELECT * FROM `user` WHERE `gender` = ? AND `age` BETWEEN ? AND ? AND `name` LIKE ?;
+SELECT * FROM `user` WHERE `gender` = ? AND `age` BETWEEN ? AND ? AND `name` LIKE ? AND `status` > ? AND `status` != ? AND `status` != ? AND (`more` != ? OR `more` = ?) AND (`morein` != ? OR `morein` != ? OR `morein` > ?);
 ```
 ```json
-[1, 20, 80, "%Jackson%"]
+[ 1, 20, 80, "%Jackson%", 2, 5, 6, 1, 2, 1, 2, -10 ]
 ```

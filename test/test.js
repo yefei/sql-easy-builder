@@ -24,7 +24,7 @@ describe('Builder', function() {
       }
     };
     assert.deepStrictEqual(whereBuilder(builder, test), [
-      '`name` = ? AND `age` >= ? AND `bb` IS NULL AND `cc` IS NOT NULL AND `dd` IN (?, ?, ?) AND `ee` NOT IN (?, ?, ?) AND (`or1` = ? OR `or2` = ?) AND `date` BETWEEN ? AND ? AND `date2` NOT BETWEEN (?, ?)',
+      '`name` = ? AND `age` >= ? AND `bb` IS NULL AND `cc` IS NOT NULL AND `dd` IN (?, ?, ?) AND `ee` NOT IN (?, ?, ?) AND (`or1` = ? OR `or2` = ?) AND `date` BETWEEN ? AND ? AND `date2` NOT BETWEEN ? AND ?',
       ['test', 18, 4, 5, 6, 7, 8, 9, 1, 2, 1, 100, 1, 100]
     ]);
 
@@ -36,6 +36,55 @@ describe('Builder', function() {
     assert.deepStrictEqual(whereBuilder(builder, { name: 'yf', age: builder.func('NOW') }), [
       '`name` = ? AND `age` = NOW()',
       ['yf']
+    ]);
+
+    assert.deepStrictEqual(whereBuilder(builder, {
+      name: 'yf',
+      age: {
+        gt: 10,
+        ne: 50,
+      }
+    }), [
+      '`name` = ? AND `age` > ? AND `age` != ?',
+      ['yf', 10, 50]
+    ]);
+
+    assert.deepStrictEqual(whereBuilder(builder, {
+      name: 'yf',
+      age: {
+        $or: {
+          gt: 10,
+          ne: 50,
+        }
+      }
+    }), [
+      '`name` = ? AND (`age` > ? OR `age` != ?)',
+      ['yf', 10, 50]
+    ]);
+
+    assert.deepStrictEqual(whereBuilder(builder, {
+      gender: 1,
+      age: { between: [20, 80] },
+      name: { like: '%Jackson%' },
+      status: {
+        gt: 2,
+        ne: [5, 6],
+      },
+      more: {
+        $or: {
+          ne: 1,
+          eq: 2,
+        }
+      },
+      morein: {
+        $or: {
+          ne: [1, 2],
+          gt: -10,
+        }
+      }
+    }), [
+      '`gender` = ? AND `age` BETWEEN ? AND ? AND `name` LIKE ? AND `status` > ? AND `status` != ? AND `status` != ? AND (`more` != ? OR `more` = ?) AND (`morein` != ? OR `morein` != ? OR `morein` > ?)',
+      [ 1, 20, 80, '%Jackson%', 2, 5, 6, 1, 2, 1, 2, -10 ],
     ]);
   });
 
