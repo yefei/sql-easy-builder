@@ -221,4 +221,22 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it("select({ user: ['id', 'name'], profile: ['edu', 'work'] })", function() {
+    const q = new Builder();
+    q.select({ user: ['id', 'name'], profile: ['edu', 'work'] });
+    assert.deepStrictEqual(q.build(), [
+      'SELECT `user`.`id`, `user`.`name`, `profile`.`edu`, `profile`.`work`',
+      [],
+    ]);
+  });
+
+  it("select({ user: { id: 'userId', name: 'user.Name' } })", function() {
+    const q = new Builder();
+    q.select({ user: { id: 'userId', name: 'user.Name' } });
+    assert.deepStrictEqual(q.build(), [
+      'SELECT `user`.`id` AS `userId`, `user`.`name` AS `user`.`Name`',
+      [],
+    ]);
+  });
 });

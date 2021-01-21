@@ -42,7 +42,9 @@ export declare class Builder {
   append(sql: string, params?: any[]): Builder;
 
   /**
-   * fields('id', 'name', { age: 'user_age', id: 'user_id' }, ...) => id, name, age as user_age, id as user_id
+   * fields(['id', 'name', { age: 'user_age', id: 'user_id' }]) => id, name, age as user_age, id as user_id
+   * fields([{ user: ['id', 'name'], profile: ['edu', 'work'] }]) => user.id, user.name, profile.edu, profile.work
+   * fields([{ user: { id: 'userId', name: 'user.Name' } }]) => user.id AS userId, user.name as user.Name
    * @param fields 
    */
   fields(fields: string[] | { [key: string]: string }): Builder;
@@ -50,6 +52,8 @@ export declare class Builder {
   /**
    * select() => SELECT *
    * select('id', 'name', { age: 'user_age', id: 'user_id' }, ...) => SELECT id, name, age as user_age, id as user_id
+   * select({ user: ['id', 'name'], profile: ['edu', 'work'] }) => SELECT user.id, user.name, profile.edu, profile.work
+   * select({ user: { id: 'userId', name: 'user.Name' } }) => SELECT user.id AS userId, user.name as user.Name
    * @param cloums 
    */
   select(...cloums: string[] | { [key: string]: string }[]): Builder;
