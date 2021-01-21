@@ -38,6 +38,7 @@ export declare class Builder {
   clone(): Builder;
   raw(str: string): Raw;
   quote(c: string | Raw): string;
+  q(c: string | Raw): string;
   append(sql: string): Builder;
 
   /**
@@ -82,6 +83,34 @@ export declare class Builder {
    * @param alias 
    */
   from(name: string | Raw, alias: string | Raw): Builder;
+
+
+  /**
+   * join('user', { user.id: other.id }) => INNER JOIN user ON(user.id = other.id)
+   * join('user', 'u', { u.id: other.id }) => INNER JOIN user AS u ON(u.id = other.id)
+   * @param table
+   * @param alias
+   * @param on
+   */
+  join(table: string|Raw, alias:string|Raw|((w: Where) => Where), on?:(w: Where) => Where): Builder;
+
+  /**
+   * join('user', { user.id: other.id }) => LEFT JOIN user ON(user.id = other.id)
+   * join('user', 'u', { u.id: other.id }) => LEFT JOIN user AS u ON(u.id = other.id)
+   * @param table
+   * @param alias
+   * @param on
+   */
+  leftJoin(table: string|Raw, alias:string|Raw|((w: Where) => Where), on?:(w: Where) => Where): Builder;
+
+  /**
+   * join('user', { user.id: other.id }) => RIGHT JOIN user ON(user.id = other.id)
+   * join('user', 'u', { u.id: other.id }) => RIGHT JOIN user AS u ON(u.id = other.id)
+   * @param table
+   * @param alias
+   * @param on
+   */
+  rightJoin(table: string|Raw, alias:string|Raw|((w: Where) => Where), on?:(w: Where) => Where): Builder;
 
   /**
    * where({ username: 'test' }) => WHERE username = ?; ['test']

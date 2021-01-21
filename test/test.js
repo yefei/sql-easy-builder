@@ -182,4 +182,34 @@ describe('Builder', function() {
       ['xiaohong', 18],
     ]);
   });
+
+  it('join', function() {
+    const q = new Builder();
+    q.select().from('user').join('profile', { 'user.id': q.q('profile.id') });
+
+    assert.deepStrictEqual(q.build(), [
+      'SELECT * FROM `user` INNER JOIN `profile` ON (`user`.`id` = `profile`.`id`)',
+      [],
+    ]);
+  });
+
+  it('join as', function() {
+    const q = new Builder();
+    q.select().from('user', 'u').join('profile', 'p', { 'u.id': q.q('p.id') });
+
+    assert.deepStrictEqual(q.build(), [
+      'SELECT * FROM `user` AS `u` INNER JOIN `profile` AS `p` ON (`u`.`id` = `p`.`id`)',
+      [],
+    ]);
+  });
+
+  it('join left', function() {
+    const q = new Builder();
+    q.select().from('user', 'u').leftJoin('profile', 'p', { 'u.id': q.q('p.id') });
+
+    assert.deepStrictEqual(q.build(), [
+      'SELECT * FROM `user` AS `u` LEFT JOIN `profile` AS `p` ON (`u`.`id` = `p`.`id`)',
+      [],
+    ]);
+  });
 });
