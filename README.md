@@ -8,70 +8,241 @@ npm i sql-easy-builder
 ## example
 
 ```js
-const Builder = require('sql-easy-builder');
-
-function builder(callback) {
-  const q = new Builder();
-  callback(q);
-  return q.build();
-}
+const { Builder } = require('sql-easy-builder');
+new Builder().select().from('user').where({ id: 1 }).build();
+```
+```sql
+SELECT * FROM `user` WHERE `id` = ?; -- [ 1 ]
 ```
 
-### select
+## select
 
 ```js
-builder(q => q.select().from('user'));
+select()
 ```
-sql:
 ```sql
-SELECT * FROM `user`
+SELECT *
 ```
-params:
-```json
-[]
+```js
+select('id', 'name')
+```
+```sql
+SELECT `id`, `name`
+```
+```js
+select('id', { name: 'realname', age: 'AGE' })
+```
+```sql
+SELECT `id`, `name` AS `realname`, `age` AS `AGE`
+```
+```js
+select('user.age', { user: ['id', 'name'], profile: ['edu', 'work'] })
+```
+```sql
+SELECT `user`.`age`, `user`.`id`, `user`.`name`, `profile`.`edu`, `profile`.`work`
+```
+```js
+select('user.age', { user: ['id', 'name'], profile: { edu: 'p.edu', work: 'p.work' } })
+```
+```sql
+SELECT `user`.`age`, `user`.`id`, `user`.`name`, `profile`.`edu` AS `p`.`edu`, `profile`.`work` AS `p`.`work`
+```
+```js
+let b = new Builder();
+b.select(b.func('MAX','id'))
+```
+```sql
+SELECT MAX(`id`)
+```
+```js
+b = new Builder();
+b.select(b.func('MAX','id','max_id'))
+```
+```sql
+SELECT MAX(`id`) AS `max_id`
+```
+```js
+b = new Builder();
+b.select(b.raw(`DISTINCT ${b.q('id')}`))
+```
+```sql
+SELECT DISTINCT `id`
+```
+
+## from
+```js
+from('user')
+```
+```sql
+FROM `user`
+```
+```js
+from('user', 'u')
+```
+```sql
+FROM `user` AS `u`
+```
+
+## update
+```js
+update('user', { name: 'yf', age: 30 })
+```
+```sql
+UPDATE `user` SET `name` = ?, `age` = ? -- [ 'yf', 30 ]
+```
+```js
+b = new Builder();
+b.update('user', { name: 'yf', age: b.q('new_age') })
+```
+```sql
+UPDATE `user` SET `name` = ?, `age` = `new_age` -- [ 'yf' ]
+```
+```js
+b = new Builder();
+b.update(['user', 'profile'], { 'user.name': 'yf', 'user.age': b.q('profile.age') })
+```
+```sql
+UPDATE `user`, `profile` SET `user`.`name` = ?, `user`.`age` = `profile`.`age` -- [ 'yf' ]
+```
+```js
+b = new Builder();
+b.update('user', { updated_at: b.func('NOW') })
+```
+```sql
+UPDATE `user` SET `updated_at` = NOW()
+```
+
+## insert
+```js
+insert('user', { name: 'yf', age: 30 })
+```
+```sql
+INSERT INTO `user` ( `name`, `age` ) VALUES ( ?, ? ) -- [ 'yf', 30 ]
+```
+```js
+b = new Builder();
+b.insert('user', { name: 'yf', age: 30, created_at: b.func('NOW') })
+```
+```sql
+INSERT INTO `user` ( `name`, `age`, `created_at` ) VALUES ( ?, ?, NOW() ) -- [ 'yf', 30 ]
+```
+
+## delete
+```js
+delete('user')
+```
+```sql
+DELETE FROM `user`
+```
+
+## join
+```js
+b = new Builder();
+b.join('user', { 'user.id': b.q('other.id') })
+```
+```sql
+INNER JOIN `user` ON (`user`.`id` = `other`.`id`)
+```
+```js
+b = new Builder();
+b.join('user', { 'user.id': b.q('other.id'), 'user.status': 1 })
+```
+```sql
+INNER JOIN `user` ON (`user`.`id` = `other`.`id` AND `user`.`status` = ?) -- [ 1 ]
+```
+```js
+b = new Builder();
+b.leftJoin('user', { 'user.id': b.q('other.id') })
+```
+```sql
+LEFT JOIN `user` ON (`user`.`id` = `other`.`id`)
+```
+```js
+b = new Builder();
+b.rightJoin('user', { 'user.id': b.q('other.id') })
+```
+```sql
+RIGHT JOIN `user` ON (`user`.`id` = `other`.`id`)
+```
+```js
+b = new Builder();
+b.join('user', 'u', { 'u.id': b.q('other.id') })
+```
+```sql
+INNER JOIN `user` AS `u` ON (`u`.`id` = `other`.`id`)
+```
+
+## count
+```js
+count()
+```
+```sql
+SELECT COUNT(*)
+```
+```js
+count('id')
+```
+```sql
+SELECT COUNT(`id`)
+```
+```js
+count('id', 'user_count')
+```
+```sql
+SELECT COUNT(`id`) AS `user_count`
+```
+
+## limit
+```js
+limit(100)
+```
+```sql
+LIMIT ? -- [ 100 ]
+```
+```js
+limit(100, 200)
+```
+```sql
+LIMIT ? OFFSET ? -- [ 100, 200 ]
+```
+
+```js
+one()
+```
+```sql
+LIMIT ? -- [ 1 ]
+```
+```js
+one(2)
+```
+```sql
+LIMIT ? OFFSET ? -- [ 1, 2 ]
+```
+```js
+isOne() // => true
+```
+
+## order
+```js
+order('id')
+```
+```sql
+ORDER BY `id` ASC
+```
+```js
+order('updated_at', 'id')
+```
+```sql
+ORDER BY `updated_at` ASC, `id` ASC
+```
+```js
+order('-updated_at', 'id')
+```
+```sql
+ORDER BY `updated_at` DESC, `id` ASC
 ```
 
 ----------------------------------------------------------
-
-```js
-builder(q => q.select().from('user').where({ age: 18 }).limit(100));
-```
-sql:
-```sql
-SELECT * FROM `user` WHERE `age` = ? LIMIT ?
-```
-params:
-```json
-[18, 100]
-```
-
-### update
-
-```js
-builder(q => q.update('user', { age: 100 }).where({ age: 18 }));
-```
-sql:
-```sql
-UPDATE `user` SET `age` = ? WHERE `age` = ?
-```
-params:
-```json
-[100, 18]
-```
-
-### count
-
-```js
-builder(q => q.count().from('user').where({ age: 18 }));
-```
-sql:
-```sql
-SELECT COUNT(*) FROM `user` WHERE `age` = ?
-```
-params:
-```json
-[18]
-```
 
 ## where operator
 ```js
