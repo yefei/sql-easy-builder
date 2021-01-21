@@ -39,7 +39,7 @@ export declare class Builder {
   raw(str: string): Raw;
   quote(c: string | Raw): string;
   q(c: string | Raw): string;
-  append(sql: string): Builder;
+  append(sql: string, params?: any[]): Builder;
 
   /**
    * fields('id', 'name', { age: 'user_age', id: 'user_id' }, ...) => id, name, age as user_age, id as user_id

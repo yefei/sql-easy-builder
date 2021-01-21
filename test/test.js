@@ -212,4 +212,13 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it('select("a.", "b.*", "c.d")', function() {
+    const q = new Builder();
+    q.select("a.", "b.*", 'c.d');
+    assert.deepStrictEqual(q.build(), [
+      'SELECT `a`.*, `b`.*, `c`.`d`',
+      [],
+    ]);
+  });
 });
