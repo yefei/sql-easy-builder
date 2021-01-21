@@ -151,7 +151,13 @@ export declare class Builder {
    */
   one(offset?: number): Builder;
 
+  setOne(v: boolean): Builder;
+
   isOne(): boolean;
+
+  nestTables(v: boolean | string): Builder;
+
+  getNestTables(): boolean | string;
 
   /**
    * order('id') => ORDER BY id ASC
