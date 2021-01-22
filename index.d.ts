@@ -47,6 +47,7 @@ export declare class Builder {
   q(c: string | Raw): string;
   op(prep: string | Raw): Op;
   append(sql: string, params?: any[]): Builder;
+  param(value: any): Builder;
 
   /**
    * fields(['id', 'name', { age: 'user_age', id: 'user_id' }]) => id, name, age as user_age, id as user_id
