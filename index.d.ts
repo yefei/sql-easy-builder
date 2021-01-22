@@ -33,12 +33,19 @@ export declare class Where {
   notiregexp(field: string | Raw, value: string | Raw): Where;
 }
 
+export declare class Op {
+  constructor(builder: Builder, prep?: string | Raw);
+  op(op: string, value: any | Raw | ((op: Op) => Op)): Op;
+  build(): { sql: string, params: any[] };
+}
+
 export declare class Builder {
   constructor(quote: string);
   clone(): Builder;
   raw(str: string): Raw;
   quote(c: string | Raw): string;
   q(c: string | Raw): string;
+  op(prep: string | Raw): Op;
   append(sql: string, params?: any[]): Builder;
 
   /**
@@ -76,7 +83,7 @@ export declare class Builder {
    * delete('uset') => DELETE FROM user
    * @param table 
    */
-  delete(table): Builder;
+  delete(table: string): Builder;
 
   as(from: string | Raw, to: string | Raw): Raw;
 

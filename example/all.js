@@ -48,6 +48,12 @@ console.log(b.update(['user', 'profile'], { 'user.name': 'yf', 'user.age': b.q('
 b = new Builder();
 console.log(b.update('user', { updated_at: b.func('NOW') }).build());
 
+b = new Builder();
+console.log(b.update('user', { balance: b.op(b.q('balance')).op('+', 100).op('/', b.op(10).op('+', 1)) }).build());
+
+b = new Builder();
+console.log(b.update('user', { balance: b.op(b.q('balance')).op('+', 100).op('*', b.op(b.q('balance')).op('%', 10)) }).build());
+
 // insert
 
 console.log(new Builder().insert('user', { name: 'yf', age: 30 }).build());
