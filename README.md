@@ -101,13 +101,13 @@ b.update('user', { updated_at: b.func('NOW') })
 ```
 ```js
 b = new Builder();
-b.update('user', { balance: b.op(b.q('balance')).op('+', 100) });
+b.update('user', { balance: b.op('balance').op('+', 100) });
 // UPDATE `user` SET `balance` = `balance` + ?
 // [ 100 ]
 ```
 ```js
 b = new Builder();
-b.update('user', { balance: b.op(b.q('balance')).op('+', 100).op('*', b.op(b.q('balance')).op('%', 10)) });
+b.update('user', { balance: b.op('balance', '+', 100).op('*', b.op('balance', '%', 10)) });
 // UPDATE `user` SET `balance` = `balance` + ? * ( `balance` % ? )
 // [ 100, 10 ]
 ```
@@ -211,6 +211,13 @@ order('updated_at', 'id')
 ```js
 order('-updated_at', 'id')
 // ORDER BY `updated_at` DESC, `id` ASC
+```
+
+## template
+```js
+SQL`SELECT * FROM {user} WHERE {user.age} > ${100}`
+// SELECT * FROM `user` WHERE `user`.`age` > ?
+// [ 100 ]
 ```
 
 ----------------------------------------------------------

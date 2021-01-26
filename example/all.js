@@ -49,10 +49,10 @@ b = new Builder();
 console.log(b.update('user', { updated_at: b.func('NOW') }).build());
 
 b = new Builder();
-console.log(b.update('user', { balance: b.op(b.q('balance')).op('+', 100).op('/', b.op(10).op('+', 1)) }).build());
+console.log(b.update('user', { balance: b.op('balance').op('+', 100).op('/', b.op(b.raw(10), '+', 1)) }).build());
 
 b = new Builder();
-console.log(b.update('user', { balance: b.op(b.q('balance')).op('+', 100).op('*', b.op(b.q('balance')).op('%', 10)) }).build());
+console.log(b.update('user', { balance: b.op('balance', '+', 100).op('*', b.op('balance', '%', 10)) }).build());
 
 // insert
 
@@ -107,3 +107,8 @@ console.log(new Builder().order('id').build());
 console.log(new Builder().order('updated_at', 'id').build());
 
 console.log(new Builder().order('-updated_at', 'id').build());
+
+
+// template
+
+console.log(new Builder().SQL`SELECT * FROM {user} WHERE {user.age} > ${100}`.build());

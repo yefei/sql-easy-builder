@@ -239,4 +239,16 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it("op", function() {
+    const q = new Builder();
+    q.update('t', {
+      a: q.op('a').op('+', 1),
+      b: q.op('b', '+', 2),
+    });
+    assert.deepStrictEqual(q.build(), [
+      'UPDATE `t` SET `a` = `a` + ?, `b` = `b` + ?',
+      [1, 2],
+    ]);
+  });
 });

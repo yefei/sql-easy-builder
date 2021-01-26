@@ -45,8 +45,9 @@ export declare class Builder {
   raw(str: string): Raw;
   quote(c: string | Raw): string;
   q(c: string | Raw): string;
-  op(prep: string | Raw): Op;
+  op(prep: string | Raw, op?: string, value?: string | number | ((op: Op) => Op)): Op;
   append(sql: string, params?: any[]): Builder;
+  SQL(strings: string[], ...args: any): Builder;
   param(value: any): Builder;
 
   /**
