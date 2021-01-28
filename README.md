@@ -222,7 +222,9 @@ SQL`SELECT * FROM {user} WHERE {user.age} > ${100}`
 
 ----------------------------------------------------------
 
-## where operator
+## json where
+
+### operator:
 ```js
 {
   eq: '=',
@@ -248,47 +250,64 @@ SQL`SELECT * FROM {user} WHERE {user.age} > ${100}`
 }
 ```
 
+### demo:
+js:
 ```js
 select().from('user').where({
-  gender: 1,
-  age: { between: [20, 80] },
-  name: { like: '%Jackson%' },
-  status: {
-    gt: 2,
-    ne: [5, 6],
-  },
-  more: {
-    $or: {
-      ne: 1,
-      eq: 2,
-    }
-  },
-  morein: {
-    $or: {
-      ne: [1, 2],
-      gt: -10,
-    }
-  }
+  f1: 'f1',
+  f2: { gt: 'f2-gt', lt: 'f2-lt', in: ['f2-in-1', 'f2-in-2'], eq: new Raw('f2-raw') },
+  f3: ['f3-1', 'f3-2'],
+  f4: ['f4'],
+  f5: [],
+  f6: new Raw('f6'),
+  f7: { between: ['f7-1', 'f7-2'] },
+  $or: { f8: 'f8', f9: 'f9' },
+  // $or: { f8: 'f8' },
+  // $or: [
+  //   { f8: 'f8' },
+  //   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
+  // ],
+  f14: null,
+  f15: { $or: { eq: 'f15-1', gt: 'f15-2', $or: { eq: 16, gt: 18 } } },
 })
 ```
+sql:
 ```SQL
 SELECT
 	* 
 FROM
 	`user` 
 WHERE
-	`gender` = ? 
-	AND `age` BETWEEN ? 
-	AND ? 
-	AND `name` LIKE ? 
-	AND `status` > ? 
-	AND `status` != ? 
-	AND `status` != ? 
-	AND ( `more` != ? OR `more` = ? ) 
-	AND ( `morein` != ? OR `morein` != ? OR `morein` > ? );
+	`f1` = ?
+  AND `f2` > ?
+  AND `f2` < ?
+  AND `f2` IN (?, ?)
+  AND `f2` = f2-raw
+  AND `f3` IN (?, ?)
+  AND `f4` = ?
+  AND `f6` = f6
+  AND `f7` BETWEEN ? AND ?
+  AND ( `f8` = ? OR `f9` = ? )
+  AND `f14` IS NULL
+  AND (
+    `f15` = ?
+    OR `f15` > ?
+    OR (
+      `f15` = ?
+      OR `f15` > ?
+    )
+  );
 ```
+params:
 ```json
-[ 1, 20, 80, "%Jackson%", 2, 5, 6, 1, 2, 1, 2, -10 ]
+[
+  "f1",      "f2-gt",   "f2-lt",
+  "f2-in-1", "f2-in-2", "f3-1",
+  "f3-2",    "f4",      "f7-1",
+  "f7-2",    "f8",      "f9",
+  "f15-1",   "f15-2",   16,
+  18
+]
 ```
 
 ## class where
