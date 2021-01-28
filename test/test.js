@@ -1,31 +1,28 @@
 const assert = require('assert');
-const { Builder, Where } = require('..');
+const { Builder, Where, Raw } = require('..');
 const josnWhere = require('../lib/json_where');
 
 describe('Builder', function() {
   it('jsonWhere', function() {
     const builder = new Builder();
     const test = {
-      name: 'test',
-      age: { gte: 18 },
-      bb: null,
-      cc: { not: null },
-      dd: [4,5,6],
-      ee: { notin: [7,8,9] },
-      $or: {
-        or1: 1,
-        or2: 2,
-      },
-      date: {
-        between: [1, 100],
-      },
-      date2: {
-        notbetween: [1, 100],
-      }
+      f1: 'f1',
+      f2: { gt: 'f2-gt', lt: 'f2-lt', in: ['f2-in-1', 'f2-in-2'], eq: new Raw('f2-raw') },
+      f3: ['f3-1', 'f3-2'],
+      f4: ['f4'],
+      f5: [],
+      f6: new Raw('f6'),
+      f7: { between: ['f7-1', 'f7-2'] },
+      // $or: { f8: 'f8', f9: 'f9' },
+      $or: [
+        { f8: 'f8' },
+        { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
+      ],
+      f14: null,
     };
     assert.deepStrictEqual(josnWhere(builder, test), [
-      '`name` = ? AND `age` >= ? AND `bb` IS NULL AND `cc` IS NOT NULL AND `dd` IN (?, ?, ?) AND `ee` NOT IN (?, ?, ?) AND (`or1` = ? OR `or2` = ?) AND `date` BETWEEN ? AND ? AND `date2` NOT BETWEEN ? AND ?',
-      ['test', 18, 4, 5, 6, 7, 8, 9, 1, 2, 1, 100, 1, 100]
+      '`f1` = ? AND `f2` > ? AND `f2` < ? AND `f2` IN (?, ?) AND `f2` = f2-raw AND `f3` IN (?, ?) AND `f4` = ? AND `f6` = f6 AND `f7` BETWEEN ? AND ? AND ( ( `f8` = ? ) OR ( `f9` = ? AND `f10` = ? AND ( `f12` = ? OR `f13` = ? ) ) ) AND `f14` IS NULL',
+      ['f1', 'f2-gt', 'f2-lt', 'f2-in-1', 'f2-in-2', 'f3-1', 'f3-2', 'f4', 'f7-1', 'f7-2', 'f8', 'f9', 'f10', 'f12', 'f13']
     ]);
 
     assert.deepStrictEqual(josnWhere(builder, { name: 'yf', age: builder.raw('1') }), [
