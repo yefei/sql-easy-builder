@@ -7,20 +7,15 @@ describe('Builder', function() {
     const builder = new Builder();
     const test = {
       f1: 'f1',
-      f2: { gt: 'f2-gt', lt: 'f2-lt', in: ['f2-in-1', 'f2-in-2'], eq: new Raw('f2-raw') },
+      f2: { $gt: 'f2-gt', $lt: 'f2-lt', $in: ['f2-in-1', 'f2-in-2'], $eq: new Raw('f2-raw') },
       f3: ['f3-1', 'f3-2'],
       f4: ['f4'],
       f5: [],
       f6: new Raw('f6'),
-      f7: { between: ['f7-1', 'f7-2'] },
+      f7: { $between: ['f7-1', 'f7-2'] },
       $or: { f8: 'f8', f9: 'f9' },
-      // $or: { f8: 'f8' },
-      // $or: [
-      //   { f8: 'f8' },
-      //   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
-      // ],
       f14: null,
-      f15: { $or: { eq: 'f15-1', gt: 'f15-2', $or: { eq: 16, gt: 18 } } },
+      f15: { $or: { $eq: 'f15-1', $gt: 'f15-2', $or: { $eq: 16, $gt: 18 } } },
     };
     assert.deepStrictEqual(josnWhere(builder, test), [
       '`f1` = ? AND `f2` > ? AND `f2` < ? AND `f2` IN (?, ?) AND `f2` = f2-raw AND `f3` IN (?, ?) AND `f4` = ? AND `f6` = f6 AND `f7` BETWEEN ? AND ? AND ( `f8` = ? OR `f9` = ? ) AND `f14` IS NULL AND ( `f15` = ? OR `f15` > ? OR ( `f15` = ? OR `f15` > ? ) )',
@@ -52,6 +47,13 @@ describe('Builder', function() {
     }), [
       '`f1` = ?',
       [now]
+    ]);
+
+    assert.deepStrictEqual(josnWhere(builder, {
+      f17: { f18: 'f17.f18', f19: { f20: { $gt: 'f20' } } }
+    }), [
+      '`f17`.`f18` = ? AND `f17`.`f19`.`f20` > ?',
+      ['f17.f18', 'f20']
     ]);
   });
 
