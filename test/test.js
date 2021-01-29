@@ -45,6 +45,14 @@ describe('Builder', function() {
       '`f1` = ? AND ( `f8` = ? OR ( `f9` = ? AND `f10` = ? AND ( `f12` = ? OR `f13` = ? ) ) )',
       ['f1', 'f8', 'f9', 'f10', 'f12', 'f13']
     ]);
+
+    const now = new Date();
+    assert.deepStrictEqual(josnWhere(builder, {
+      f1: now,
+    }), [
+      '`f1` = ?',
+      [now]
+    ]);
   });
 
   it('Where', function() {
