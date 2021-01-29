@@ -55,6 +55,19 @@ describe('Builder', function() {
       '`f17`.`f18` = ? AND `f17`.`f19`.`f20` > ?',
       ['f17.f18', 'f20']
     ]);
+
+    assert.deepStrictEqual(josnWhere(builder, {
+      f25: {
+        f26: 'f26',
+        $or: [
+          { f27: 'f27', f28: 'f28' },
+          { f29: 'f29', f30: 'f30' },
+        ]
+      }
+    }), [
+      '`f25`.`f26` = ? AND ( ( `f25`.`f27` = ? AND `f25`.`f28` = ? ) OR ( `f25`.`f29` = ? AND `f25`.`f30` = ? ) )',
+      ['f26', 'f27', 'f28', 'f29', 'f30']
+    ]);
   });
 
   it('Where', function() {
