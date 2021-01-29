@@ -8,7 +8,7 @@ npm i sql-easy-builder
 ## example
 
 ```js
-const { Builder } = require('sql-easy-builder');
+const { Builder, raw } = require('sql-easy-builder');
 new Builder().select().from('user').where({ id: 1 }).build();
 // SELECT * FROM `user` WHERE `id` = ?
 // [ 1 ]
@@ -253,11 +253,11 @@ js:
 ```js
 select().from('user').where({
   f1: 'f1',
-  f2: { $gt: 'f2-gt', $lt: 'f2-lt', $in: ['f2-in-1', 'f2-in-2'], $eq: new Raw('f2-raw') },
+  f2: { $gt: 'f2-gt', $lt: 'f2-lt', $in: ['f2-in-1', 'f2-in-2'], $eq: raw('f2-raw') },
   f3: ['f3-1', 'f3-2'],
   f4: ['f4'],
   f5: [],
-  f6: new Raw('f6'),
+  f6: raw('f6'),
   f7: { $between: ['f7-1', 'f7-2'] },
   $or: { f8: 'f8', f9: 'f9' },
   // $or: { f8: 'f8' },

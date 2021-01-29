@@ -4,6 +4,8 @@ export declare class Raw {
   toString(): string;
 }
 
+export declare function raw(str:string): Raw;
+
 export declare class Where {
   constructor(builder: Builder, conjunction?: string);
   conjunction(c: string): Where;
