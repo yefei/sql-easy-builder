@@ -29,8 +29,6 @@ export declare class Where {
   notilike(field: string | Raw, value: string | Raw): Where;
   regexp(field: string | Raw, value: string | Raw): Where;
   notregexp(field: string | Raw, value: string | Raw): Where;
-  iregexp(field: string | Raw, value: string | Raw): Where;
-  notiregexp(field: string | Raw, value: string | Raw): Where;
 }
 
 export declare class Op {
