@@ -78,6 +78,13 @@ describe('Builder', function() {
     ]);
   });
 
+  it('where(invalidity)', function() {
+    assert.deepStrictEqual(new Builder().where().build(), ['', []]);
+    assert.deepStrictEqual(new Builder().where({}).build(), ['', []]);
+    assert.deepStrictEqual(new Builder().where(null).build(), ['', []]);
+    assert.deepStrictEqual(new Builder().where(new Where()).build(), ['', []]);
+  });
+
   it('select', function() {
     const a = new Builder().select('p1', { p2: 'P2', p3: 'P3' });
     assert.deepStrictEqual(a.build(), [
