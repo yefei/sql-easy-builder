@@ -85,6 +85,10 @@ describe('Builder', function() {
     assert.deepStrictEqual(new Builder().where(new Where()).build(), ['', []]);
   });
 
+  it('where(undefined)', function() {
+    assert.deepStrictEqual(new Builder().where({ a: 1, b: undefined }).build(), ['WHERE `a` = ?', [1]]);
+  });
+
   it('select', function() {
     const a = new Builder().select('p1', { p2: 'P2', p3: 'P3' });
     assert.deepStrictEqual(a.build(), [
