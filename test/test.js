@@ -89,6 +89,19 @@ describe('Builder', function() {
     assert.deepStrictEqual(new Builder().where({ a: 1, b: undefined }).build(), ['WHERE `a` = ?', [1]]);
   });
 
+  it('where($quote $raw)', function() {
+    assert.deepStrictEqual(new Builder().where({
+      // quote
+      f31: { $quote: 'f31' },
+      f32: { $gt: { $quote: 'f32' } },
+      // raw
+      f33: { $raw: 'f33' },
+      f34: { $gt: { $raw: 'f34' } },
+      // quote and raw
+      f35: { $lt: { $raw: 'f35-r', $quote: 'f35-q' } },
+    }).build(), ['WHERE `f31` = `f31` AND `f32` > `f32` AND `f33` = f33 AND `f34` > f34 AND `f35` < f35-r AND `f35` < `f35-q`', []]);
+  });
+
   it('select', function() {
     const a = new Builder().select('p1', { p2: 'P2', p3: 'P3' });
     assert.deepStrictEqual(a.build(), [

@@ -268,7 +268,9 @@ select().from('user').where({
   f14: null,
   f15: { $or: { $eq: 'f15-1', $gt: 'f15-2', $or: { $eq: 16, $gt: 18 } } },
   f16: new Date(),
-  f17: { f18: 'f17.f18', f19: { f20: { $gt: 'f20' } } }
+  f17: { f18: 'f17.f18', f19: { f20: { $gt: 'f20' } } },
+  f21: { $quote: 'f22', $raw: 'f21-raw' },
+  f23: { $gt: { $quote: 'f24' } },
 })
 ```
 sql:
@@ -300,6 +302,9 @@ WHERE
   AND `f16` = ?
   AND `f17`.`f18` = ?
   AND `f17`.`f19`.`f20` > ?
+  AND `f21` = `f22`
+  AND `f21` = f21-raw
+  AND `f23` > `f24`
 ```
 params:
 ```json
