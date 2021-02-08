@@ -110,6 +110,15 @@ describe('Builder', function() {
     }, 'AND').build(), ['WHERE `a` = ? AND `b` = ?', [1, 2]]);
   });
 
+  it('where(after)', function() {
+    assert.deepStrictEqual(new Builder().where({
+      a: 1,
+    }).where({
+      b: 2,
+      c: 3,
+    }, 'OR (', ')').build(), ['WHERE `a` = ? OR ( `b` = ? AND `c` = ? )', [1, 2, 3]]);
+  });
+
   it('select', function() {
     const a = new Builder().select('p1', { p2: 'P2', p3: 'P3' });
     assert.deepStrictEqual(a.build(), [
