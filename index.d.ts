@@ -8,6 +8,7 @@ export declare function raw(str:string): Raw;
 
 export declare class Where {
   constructor(builder: Builder, conjunction?: string);
+  clone(): Where;
   conjunction(c: string): Where;
   holder(value: string | Raw): string;
   op(field: string | Raw, op: string, value: string | Raw): Where;
