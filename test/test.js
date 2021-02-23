@@ -263,6 +263,15 @@ describe('Builder', function() {
     ]);
   });
 
+  it("select({ asName: Builder() })", function() {
+    const q = new Builder();
+    q.select({ asName: new Builder().SQL`TEST(${1})` });
+    assert.deepStrictEqual(q.build(), [
+      'SELECT TEST(?) AS `asName`',
+      [1],
+    ]);
+  });
+
   it("op", function() {
     const q = new Builder();
     q.update('t', {
