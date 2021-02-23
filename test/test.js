@@ -68,6 +68,25 @@ describe('Builder', function() {
       '`f25`.`f26` = ? AND ( ( `f25`.`f27` = ? AND `f25`.`f28` = ? ) OR ( `f25`.`f29` = ? AND `f25`.`f30` = ? ) )',
       ['f26', 'f27', 'f28', 'f29', 'f30']
     ]);
+
+    assert.deepStrictEqual(josnWhere(builder, {
+      $and: [
+        { f36: { $ne: 1 } },
+        { f36: { $ne: 2 } },
+      ],
+      f37: {
+        $and: { f38: 38, f39: 39 },
+      },
+      f40: {
+        $and: [
+          { f41: { $ne: 1 } },
+          { f41: { $ne: 2 } },
+        ]
+      },
+    }), [
+      '( `f36` != ? AND `f36` != ? ) AND ( `f37`.`f38` = ? AND `f37`.`f39` = ? ) AND ( `f40`.`f41` != ? AND `f40`.`f41` != ? )',
+      [1, 2, 38, 39, 1, 2]
+    ]);
   });
 
   it('Where', function() {
