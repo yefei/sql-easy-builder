@@ -87,6 +87,15 @@ describe('Builder', function() {
       '( `f36` != ? AND `f36` != ? ) AND ( `f37`.`f38` = ? AND `f37`.`f39` = ? ) AND ( `f40`.`f41` != ? AND `f40`.`f41` != ? )',
       [1, 2, 38, 39, 1, 2]
     ]);
+
+    assert.deepStrictEqual(josnWhere(builder, {
+      f1: { $in: [1] },
+      f2: [2],
+      f3: [3, 4, 5],
+    }), [
+      '`f1` IN (?) AND `f2` = ? AND `f3` IN (?, ?, ?)',
+      [1,2,3,4,5]
+    ]);
   });
 
   it('Where', function() {
