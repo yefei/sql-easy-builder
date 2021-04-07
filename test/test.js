@@ -300,6 +300,15 @@ describe('Builder', function() {
     ]);
   });
 
+  it("select({ asName: Raw() })", function() {
+    const q = new Builder();
+    q.select({ asName: q.raw('1+1') });
+    assert.deepStrictEqual(q.build(), [
+      'SELECT 1+1 AS `asName`',
+      [],
+    ]);
+  });
+
   it("op", function() {
     const q = new Builder();
     q.update('t', {
