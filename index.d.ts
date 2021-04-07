@@ -181,5 +181,17 @@ export declare class Builder {
    */
   order(...fields: string[]): Builder;
 
+  /**
+   * group('id') => GROUP BY id
+   * @param fields 
+   */
+  group(...fields: string[]): Builder;
+
+  /**
+   * having({ count: { $gt: 10 } }) => HAVING count > 10
+   * @param query 
+   */
+  having(query: ((w: Where) => Where)): Builder;
+
   build(): [string, any[]];
 }
