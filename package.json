@@ -1,6 +1,6 @@
 {
   "name": "sql-easy-builder",
-  "version": "0.14.2",
+  "version": "0.15.0",
   "description": "SQL easy builder",
   "main": "index.js",
   "repository": "https://github.com/yefei/sql-easy-builder",
