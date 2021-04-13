@@ -347,4 +347,13 @@ describe('Builder', function() {
       [1, 2],
     ]);
   });
+
+  it("SQL`IN`", function() {
+    const q = new Builder();
+    q.SQL`A in (${[1,2,3]})`;
+    assert.deepStrictEqual(q.build(), [
+      'A in (?,?,?)',
+      [1, 2, 3],
+    ]);
+  });
 });
