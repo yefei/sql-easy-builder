@@ -1,3 +1,5 @@
+import Fn from "./lib/fn";
+import Quote from "./lib/quote";
 
 export declare class Raw {
   constructor(str: string);
@@ -198,4 +200,10 @@ export declare class Builder {
   having(query: ((w: Where) => Where)): Builder;
 
   build(): [string, any[]];
+}
+
+export interface Q {
+  quote(col: string): Quote;
+  raw(str: string): Raw;
+  count(col: string): Fn;
 }

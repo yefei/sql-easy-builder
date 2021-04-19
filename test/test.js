@@ -1,5 +1,6 @@
 const assert = require('assert');
 const { Builder, Where, raw } = require('..');
+const { Q } = require('..');
 const josnWhere = require('../lib/json_where');
 
 describe('Builder', function() {
@@ -354,6 +355,33 @@ describe('Builder', function() {
     assert.deepStrictEqual(q.build(), [
       'A in (?,?,?)',
       [1, 2, 3],
+    ]);
+  });
+ 
+  it("select(Q.count)", function() {
+    const q = new Builder();
+    q.select(Q.count('*'));
+    assert.deepStrictEqual(q.build(), [
+      'SELECT COUNT(*)',
+      [],
+    ]);
+  });
+
+  it("select({ asName: Q.count })", function() {
+    const q = new Builder();
+    q.select({ asName: Q.count('*') });
+    assert.deepStrictEqual(q.build(), [
+      'SELECT COUNT(*) AS `asName`',
+      [],
+    ]);
+  });
+
+  it("update(Q.increase)", function() {
+    const q = new Builder();
+    q.update('test', { c: Q.add('c') });
+    assert.deepStrictEqual(q.build(), [
+      'SELECT COUNT(*)',
+      [],
     ]);
   });
 });
