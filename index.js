@@ -1,9 +1,6 @@
 'use strict';
 
-const Raw = require('./lib/raw');
-const Fn = require('./lib/fn');
-const Quote = require('./lib/quote');
-const Op = require('./lib/op');
+const { Raw, Fn, Quote, Op } = require('./lib/q');
 
 const Q = {
   quote(col) { return new Quote(col); },
