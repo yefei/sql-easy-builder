@@ -376,7 +376,7 @@ describe('Builder', function() {
     const q = new Builder();
     q.select(AB.count('*'), { s: AB.SQL`SUM({a} + {b})` });
     assert.deepStrictEqual(q.build(), [
-      'SELECT COUNT(*), `SUM(`a` + `b`)` AS `s`',
+      'SELECT COUNT(*), SUM(`a` + `b`) AS `s`',
       [],
     ]);
   });
