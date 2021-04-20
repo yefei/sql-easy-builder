@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { Builder, Where, raw } = require('..');
+const { Builder, Where, raw, AB } = require('..');
 const josnWhere = require('../lib/json_where');
 
 describe('Builder', function() {
@@ -354,6 +354,21 @@ describe('Builder', function() {
     assert.deepStrictEqual(q.build(), [
       'A in (?,?,?)',
       [1, 2, 3],
+    ]);
+  });
+
+  it("AB", function() {
+    const q = new Builder();
+    q.update('test', {
+      a: AB.count('*'),
+      b: AB.quote('c'),
+      c: AB.incr('c'),
+      d: AB.decr('d'),
+      e: AB.SQL`100 + ${200}`,
+    });
+    assert.deepStrictEqual(q.build(), [
+      'UPDATE `test` SET `a` = COUNT(*), `b` = `c`, `c` = `c` + ?, `d` = `d` - ?, `e` = 100 + ?',
+      [1, 1, 200],
     ]);
   });
 });

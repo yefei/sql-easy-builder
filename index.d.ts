@@ -1,9 +1,9 @@
-
 export declare class Raw {
   constructor(str: string);
   toString(): string;
 }
 
+/** @deprecated use AttrBuilds.raw */
 export declare function raw(str:string): Raw;
 
 export declare class Where {
@@ -34,10 +34,25 @@ export declare class Where {
   notregexp(field: string | Raw, value: string | Raw): Where;
 }
 
-export declare class Op {
-  constructor(builder: Builder, prep?: string | Raw);
+export declare class AttrBuilder {
+  build(builder: Builder): [string, any[]];
+}
+
+export declare class Op extends AttrBuilder {
+  constructor(prep?: string | Raw);
   op(op: string, value: any | Raw | ((op: Op) => Op)): Op;
-  build(): { sql: string, params: any[] };
+}
+
+export declare class Fn extends AttrBuilder {
+  constructor(fn: string, args?: any);
+}
+
+export declare class Quote extends AttrBuilder {
+  constructor(col: string);
+}
+
+export declare class Template extends AttrBuilder {
+  constructor(strings: string[], args: any[]);
 }
 
 export declare class Builder {
@@ -199,3 +214,13 @@ export declare class Builder {
 
   build(): [string, any[]];
 }
+
+export declare namespace AB {
+  declare function raw(str: string): Raw;
+  declare function quote(col: string): Quote;
+  declare function SQL(strings: string[], ...args: any[]): Template;
+  declare function op(prep: string): Op;
+  declare function count(col: string): Fn;
+  declare function incr(col: string, val?: number): Op;
+  declare function decr(col: string, val?: number): Op;
+};
