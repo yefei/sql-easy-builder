@@ -357,7 +357,7 @@ describe('Builder', function() {
     ]);
   });
 
-  it("AB", function() {
+  it("update(AB)", function() {
     const q = new Builder();
     q.update('test', {
       a: AB.count('*'),
@@ -369,6 +369,15 @@ describe('Builder', function() {
     assert.deepStrictEqual(q.build(), [
       'UPDATE `test` SET `a` = COUNT(*), `b` = `c`, `c` = `c` + ?, `d` = `d` - ?, `e` = 100 + ?',
       [1, 1, 200],
+    ]);
+  });
+
+  it("select(AB)", function() {
+    const q = new Builder();
+    q.select(AB.count('*'), { s: AB.SQL`SUM({a} + {b})` });
+    assert.deepStrictEqual(q.build(), [
+      'SELECT COUNT(*), `SUM(`a` + `b`)` AS `s`',
+      [],
     ]);
   });
 });
