@@ -380,4 +380,13 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it("where(AB)", function() {
+    const q = new Builder();
+    q.where({ a: AB.SQL`{a} + {b} + ${111}`, b: AB.quote('c') });
+    assert.deepStrictEqual(q.build(), [
+      'WHERE `a` = `a` + `b` + ? AND `b` = `c`',
+      [111],
+    ]);
+  });
 });
