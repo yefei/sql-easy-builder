@@ -389,4 +389,13 @@ describe('Builder', function() {
       [111],
     ]);
   });
+
+  it("where({ $ne: null })", function() {
+    const q = new Builder();
+    q.where({ a: null, b: { $ne: null } });
+    assert.deepStrictEqual(q.build(), [
+      'WHERE `a` IS NULL AND `b` IS NOT NULL',
+      [],
+    ]);
+  });
 });
