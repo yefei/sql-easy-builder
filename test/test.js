@@ -398,4 +398,22 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it("where({ $eq: null })", function() {
+    const q = new Builder();
+    q.where({ a: { $eq: null } });
+    assert.deepStrictEqual(q.build(), [
+      'WHERE `a` IS NULL',
+      [],
+    ]);
+  });
+
+  it("where({ $EQ: null, $notIn: [1,2,3] })", function() {
+    const q = new Builder();
+    q.where({ a: { $EQ: null, $notIn: [1,2,3] } });
+    assert.deepStrictEqual(q.build(), [
+      'WHERE `a` IS NULL AND `a` NOT IN (?, ?, ?)',
+      [1, 2, 3],
+    ]);
+  });
 });
