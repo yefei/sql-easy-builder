@@ -114,7 +114,7 @@ describe('Builder', function() {
   });
 
   it('where(undefined)', function() {
-    assert.deepStrictEqual(new Builder().where({ a: 1, b: undefined }).build(), ['WHERE `a` = ?', [1]]);
+    assert.deepStrictEqual(new Builder().where({ a: 1, b: undefined }).build(), ['WHERE `a` = ? AND `b` = ?', [1, undefined]]);
   });
 
   it('where($quote $raw)', function() {
