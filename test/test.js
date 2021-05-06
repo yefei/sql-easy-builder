@@ -416,4 +416,16 @@ describe('Builder', function() {
       [1, 2, 3],
     ]);
   });
+
+  it('insert(AB)', function() {
+    const q = new Builder().insert('user', {
+      name: 'xiaohong',
+      age: AB.SQL`RAND(${100})`,
+    });
+
+    assert.deepStrictEqual(q.build(), [
+      'INSERT INTO `user` ( `name`, `age` ) VALUES ( ?, RAND(?) )',
+      ['xiaohong', 100],
+    ]);
+  });
 });
