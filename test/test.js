@@ -1,6 +1,7 @@
 const assert = require('assert');
 const { Builder, Where, raw, AB } = require('..');
 const josnWhere = require('../lib/json_where');
+const Raw = require('../lib/raw');
 
 describe('Builder', function() {
   it('jsonWhere', function() {
@@ -426,6 +427,17 @@ describe('Builder', function() {
     assert.deepStrictEqual(q.build(), [
       'INSERT INTO `user` ( `name`, `age` ) VALUES ( ?, RAND(?) )',
       ['xiaohong', 100],
+    ]);
+  });
+
+  it('jsonWhere(AB, Raw)', function() {
+    const q = new Builder().where({
+      $and: [AB.SQL`AB`, new Raw('RAW')],
+      $or: [AB.SQL`AB`, new Raw('RAW')],
+    });
+    assert.deepStrictEqual(q.build(), [
+      'WHERE ( AB AND RAW ) AND ( AB OR RAW )',
+      [],
     ]);
   });
 });
