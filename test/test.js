@@ -440,4 +440,15 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it('jsonWhere($or:[])', function() {
+    const q = new Builder().where({
+      $and: [],
+      $or: [],
+    });
+    assert.deepStrictEqual(q.build(), [
+      '',
+      [],
+    ]);
+  });
 });
