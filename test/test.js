@@ -451,4 +451,12 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it('quote(AB)', function() {
+    const q = new Builder().count(AB.SQL`DISTINCT {id}`);
+    assert.deepStrictEqual(q.build(), [
+      'SELECT COUNT(DISTINCT `id`)',
+      [],
+    ]);
+  });
 });
