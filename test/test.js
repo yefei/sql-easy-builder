@@ -11,7 +11,6 @@ describe('Builder', function() {
       f2: { $gt: 'f2-gt', $lt: 'f2-lt', $in: ['f2-in-1', 'f2-in-2'], $eq: raw('f2-raw') },
       f3: ['f3-1', 'f3-2'],
       f4: ['f4'],
-      f5: [],
       f6: raw('f6'),
       f7: { $between: ['f7-1', 'f7-2'] },
       $or: { f8: 'f8', f9: 'f9' },
@@ -179,6 +178,17 @@ describe('Builder', function() {
     assert.deepStrictEqual(a.clone().order('-t', 'id').build(), [
       'SELECT `p1`, `p2` AS `P2`, `p3` AS `P3` FROM `t` WHERE `a` = ? AND `b` = ? ORDER BY `t` DESC, `id` ASC',
       [1, 'str'],
+    ]);
+  });
+
+  it('select(AB)', function() {
+    assert.deepStrictEqual(new Builder().select('*', AB.SQL`1+1 as {A}`).build(), [
+      'SELECT *, 1+1 as `A`',
+      [],
+    ]);
+    assert.deepStrictEqual(new Builder().select({ a: AB.SQL`1+1 as {A}`, b: '*' }).build(), [
+      'SELECT 1+1 as `A` AS `a`, `b` AS *',
+      [],
     ]);
   });
 
