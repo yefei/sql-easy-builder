@@ -6,45 +6,111 @@ export declare class Raw {
 /** @deprecated use AttrBuilds.raw */
 export declare function raw(str:string): Raw;
 
+type Value = string | number | boolean | Date | Raw;
+
 export declare class Where {
   constructor(builder: Builder, conjunction?: string);
   clone(): Where;
   conjunction(c: string): Where;
-  holder(value: string | Raw): string;
-  op(field: string | Raw, op: string, value: string | Raw): Where;
+  holder(value: Value): string;
+  op(field: string | Raw, op: string, value: Value): Where;
   or(callback: (w: Where) => Where): Where;
-  in(field: string | Raw, values: (string|Raw)[]): Where;
-  notin(field: string | Raw, values: (string|Raw)[]): Where;
-  between(field: string | Raw, start: string | Raw, end: string | Raw): Where;
-  notbetween(field: string | Raw, start: string | Raw, end: string | Raw): Where;
-  build(): [string, any[]];
-  eq(field: string | Raw, value: string | Raw): Where;
-  ne(field: string | Raw, value: string | Raw): Where;
-  gte(field: string | Raw, value: string | Raw): Where;
-  gt(field: string | Raw, value: string | Raw): Where;
-  lte(field: string | Raw, value: string | Raw): Where;
-  lt(field: string | Raw, value: string | Raw): Where;
-  not(field: string | Raw, value: string | Raw): Where;
-  is(field: string | Raw, value: string | Raw): Where;
-  like(field: string | Raw, value: string | Raw): Where;
-  notlike(field: string | Raw, value: string | Raw): Where;
-  ilike(field: string | Raw, value: string | Raw): Where;
-  notilike(field: string | Raw, value: string | Raw): Where;
-  regexp(field: string | Raw, value: string | Raw): Where;
-  notregexp(field: string | Raw, value: string | Raw): Where;
+  in(field: string | Raw, values: Value[]): Where;
+  notin(field: string | Raw, values: Value[]): Where;
+  between(field: string | Raw, start: Value, end: Value): Where;
+  notbetween(field: string | Raw, start: Value, end: Value): Where;
+  build(): [string, Value[]];
+  eq(field: string | Raw, value: Value): Where;
+  ne(field: string | Raw, value: Value): Where;
+  gte(field: string | Raw, value: Value): Where;
+  gt(field: string | Raw, value: Value): Where;
+  lte(field: string | Raw, value: Value): Where;
+  lt(field: string | Raw, value: Value): Where;
+  not(field: string | Raw, value: Value): Where;
+  is(field: string | Raw, value: Value): Where;
+  like(field: string | Raw, value: Value): Where;
+  notlike(field: string | Raw, value: Value): Where;
+  ilike(field: string | Raw, value: Value): Where;
+  notilike(field: string | Raw, value: Value): Where;
+  regexp(field: string | Raw, value: Value): Where;
+  notregexp(field: string | Raw, value: Value): Where;
+}
+
+export interface JsonWhereOp {
+  /** = */
+  $eq: Value;
+
+  /** != */
+  $ne: Value;
+
+  /** >= */
+  $gte: Value;
+
+  /** > */
+  $gt: Value;
+
+  /** <= */
+  $lte: Value;
+
+  /** < */
+  $lt: Value;
+
+  /** IS */
+  $is: Value;
+
+  /** IS NOT */
+  $isnot: Value;
+
+  /** IS NOT */
+  $not: Value;
+
+  /** LIKE */
+  $like: string;
+
+  /** NOT LIKE */
+  $notlike: string;
+
+  /** ILIKE */
+  $ilike: string;
+
+  /** NOT ILIKE */
+  $notilike: string;
+
+  /** REGEXP */
+  $regexp: string;
+
+  /** NOT REGEXP */
+  $notregexp: string;
+
+  $in: Value[],
+  $notin: Value[],
+  $between: [Value, Value],
+  $notbetween: [Value, Value],
+
+  /** 字段转译 */
+  $quote: string;
+
+  /** 原始内容 */
+  $raw: string;
+}
+
+export interface JsonWhere {
+  $or: JsonWhere | JsonWhere[];
+  $and: JsonWhere | JsonWhere[];
+  [field: string]: JsonWhereOp | JsonWhere | JsonWhere[] | Value | Value[];
 }
 
 export declare class AttrBuilder {
-  build(builder: Builder): [string, any[]];
+  build(builder: Builder): [string, Value[]];
 }
 
 export declare class Op extends AttrBuilder {
   constructor(prep?: string | Raw);
-  op(op: string, value: any | Raw | ((op: Op) => Op)): Op;
+  op(op: string, value: Value | ((op: Op) => Op)): Op;
 }
 
 export declare class Fn extends AttrBuilder {
-  constructor(fn: string, args?: any);
+  constructor(fn: string, args?: Value);
 }
 
 export declare class Quote extends AttrBuilder {
@@ -52,7 +118,7 @@ export declare class Quote extends AttrBuilder {
 }
 
 export declare class Template extends AttrBuilder {
-  constructor(strings: string[], args: any[]);
+  constructor(strings: string[], args: Value[]);
 }
 
 export declare class Builder {
@@ -62,9 +128,9 @@ export declare class Builder {
   quote(c: string | Raw): string;
   q(c: string | Raw): string;
   op(prep: string | Raw, op?: string, value?: string | number | ((op: Op) => Op)): Op;
-  append(sql: string, params?: any[]): Builder;
-  SQL(strings: string[], ...args: any): Builder;
-  param(value: any): Builder;
+  append(sql: string, params?: Value[]): Builder;
+  SQL(strings: string[], ...args: Value): Builder;
+  param(value: Value): Builder;
 
   /**
    * fields(['id', 'name', { age: 'user_age', id: 'user_id' }]) => id, name, age as user_age, id as user_id
@@ -92,14 +158,14 @@ export declare class Builder {
    * @param table 
    * @param columns 
    */
-  update(table: string, columns: { [key: string]: any }): Builder;
+  update(table: string, columns: { [key: string]: Value }): Builder;
 
   /**
    * insert('user', { name: 'yf', age: 18, }) => INSERT INTO user (name, age) VALUES (?, ?); ['yf', 18]
    * @param table 
    * @param columns 
    */
-  insert(table: string, columns: { [key: string]: any }): Builder;
+  insert(table: string, columns: { [key: string]: Value }): Builder;
 
   /**
    * delete('uset') => DELETE FROM user
@@ -150,7 +216,7 @@ export declare class Builder {
    * where(w => w.eq('username', 'test')) => WHERE username = ?; ['test']
    * @param query 
    */
-  where(query: { [key: string]: any } | ((w: Where) => Where)): Builder;
+  where(query: JsonWhere | ((w: Where) => Where)): Builder;
 
   /**
    * func('COUNT', '*') => COUNT(*)
@@ -212,15 +278,19 @@ export declare class Builder {
    */
   having(query: ((w: Where) => Where)): Builder;
 
-  build(): [string, any[]];
+  build(): [string, Value[]];
 }
 
 export declare namespace AB {
-  declare function raw(str: string): Raw;
-  declare function quote(col: string): Quote;
-  declare function SQL(strings: string[], ...args: any[]): Template;
-  declare function op(prep: string): Op;
-  declare function count(col: string): Fn;
-  declare function incr(col: string, val?: number): Op;
-  declare function decr(col: string, val?: number): Op;
-};
+  function raw(str: string): Raw;
+  function quote(col: string): Quote;
+  function SQL(strings: string[], ...args: Value[]): Template;
+  function op(prep: string): Op;
+  function count(col: string): Fn;
+  function avg(col: string): Fn;
+  function sum(col: string): Fn;
+  function min(col: string): Fn;
+  function max(col: string): Fn;
+  function incr(col: string, val?: number): Op;
+  function decr(col: string, val?: number): Op;
+}
