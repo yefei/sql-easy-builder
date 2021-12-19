@@ -1,24 +1,79 @@
-'use strict';
+import { Builder } from './builder';
+import isPlainObject = require('lodash.isplainobject');
+import { all as operatorMap } from './where_ops';
+import { BuildResult, ValueType } from './types';
+import { Raw } from './raw';
+import { AttrBuilder } from './attr_builder';
 
-/**
- * @typedef { import('./builder') } Builder
- */
+export interface JsonWhereOp {
+  /** = */
+  $eq: ValueType;
 
-const isPlainObject = require('lodash.isplainobject');
-const Raw = require('./raw');
-const { AttrBuilder } = require('./attr_builder');
-const operatorMap = require('./where_ops').all;
+  /** != */
+  $ne: ValueType;
 
-/**
- * @param {Builder} builder 
- * @param {{[key: string]: any}} obj 
- * @param {string} conjunction 
- */
-function jsonWhere(builder, obj, conjunction = 'AND') {
-  const sql = [];
-  const params = [];
+  /** >= */
+  $gte: ValueType;
 
-  function holder(v) {
+  /** > */
+  $gt: ValueType;
+
+  /** <= */
+  $lte: ValueType;
+
+  /** < */
+  $lt: ValueType;
+
+  /** IS */
+  $is: ValueType;
+
+  /** IS NOT */
+  $isnot: ValueType;
+
+  /** IS NOT */
+  $not: ValueType;
+
+  /** LIKE */
+  $like: ValueType;
+
+  /** NOT LIKE */
+  $notlike: ValueType;
+
+  /** ILIKE */
+  $ilike: ValueType;
+
+  /** NOT ILIKE */
+  $notilike: ValueType;
+
+  /** REGEXP */
+  $regexp: ValueType;
+
+  /** NOT REGEXP */
+  $notregexp: ValueType;
+
+  $in: ValueType[],
+  $notin: ValueType[],
+  $between: [start: ValueType, end: ValueType],
+  $notbetween: [start: ValueType, end: ValueType],
+
+  /** 字段转译 */
+  $quote: string;
+
+  /** 原始内容 */
+  $raw: string;
+}
+
+export interface JsonWhere {
+  $or?: JsonWhere | JsonWhere[];
+  $and?: JsonWhere | JsonWhere[];
+  [field: string]: JsonWhereOp | JsonWhere | JsonWhere[] | ValueType | ValueType[];
+}
+
+export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND'): BuildResult {
+  const sql: string[] = [];
+  const params: ValueType[] = [];
+
+  function holder(v: ValueType) {
     if (v instanceof Raw) return v.toString();
     if (v instanceof AttrBuilder) {
       const [_sql, _params] = v.build(builder);
@@ -37,7 +92,7 @@ function jsonWhere(builder, obj, conjunction = 'AND') {
    *   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
    * ]
    */
-  function fieldObject(key, value) {
+  function fieldObject(key: string, value: any) {
     if (key === '$or' || key === '$and') {
       const _con = key.substring(1).toUpperCase();
       // $or: [
@@ -45,21 +100,21 @@ function jsonWhere(builder, obj, conjunction = 'AND') {
       //   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
       // ]
       if (Array.isArray(value) && value.length > 0) {
-        const _sql = [];
-        const _params = [];
+        const _sql: string[] = [];
+        const _params: ValueType[] = [];
         value.forEach(item => {
-          const [_item_sqls, _item_params] = jsonWhere(builder, item, null);
-          _sql.push(_item_sqls.length > 1 ? `( ${_item_sqls.join(' AND ')} )` : _item_sqls[0]);
+          const [_item_sqls, _item_params] = jsonWhere(builder, item);
+          _sql.push(`(${_item_sqls})`);
           _params.push(..._item_params);
         });
-        sql.push(_sql.length === 1 ? _sql[0] : `( ${_sql.join(` ${_con} `)} )`);
+        sql.push(_sql.length === 1 ? _sql[0] : `(${_sql.join(` ${_con} `)})`);
         params.push(..._params);
       }
 
       // $or: { f8: 'f8', f9: 'f9' }
       else if (isPlainObject(value)) {
-        const [_sqls, _params] = jsonWhere(builder, value, null);
-        sql.push(_sqls.length > 1 ? `( ${_sqls.join(` ${_con} `)} )` : _sqls[0]);
+        const [_sqls, _params] = jsonWhere(builder, value, _con);
+        sql.push(`(${_sqls})`);
         params.push(..._params);
       }
       return;
@@ -69,15 +124,8 @@ function jsonWhere(builder, obj, conjunction = 'AND') {
     });
   }
 
-  let lastOp;
-
-  /**
-   * @param {string} key 
-   * @param {string} op 
-   * @param {*} value 
-   * @returns 
-   */
-  function appendOp(key, op, value) {
+  let lastOp: string;
+  function appendOp(key: string, op: string, value: any) {
     // ignore undefined
     if (value === undefined) throw new Error(`${key} value is undefined`);
 
@@ -161,7 +209,7 @@ function jsonWhere(builder, obj, conjunction = 'AND') {
     }
 
     if (op === null) op = 'eq';
-    if (operatorMap[op] === undefined) {
+    if (!(op in operatorMap)) {
       throw new TypeError(`Unknown operator: ${op}`);
     }
 
@@ -182,7 +230,7 @@ function jsonWhere(builder, obj, conjunction = 'AND') {
     });
   }
 
-  return [conjunction ? sql.join(` ${conjunction} `) : sql, params];
+  return [sql.join(` ${conjunction} `), params];
 }
 
 /*
@@ -244,5 +292,3 @@ const test = {
 };
 console.log(jsonWhere(builder, test));
 */
-
-module.exports = jsonWhere;

@@ -9,3 +9,4 @@ yarn.lock
 *.un~
 apidoc/
 .github/
+dist/

@@ -1,52 +1,39 @@
-/**
- * @typedef { import('./builder') } Builder
- */
-'use strict';
+import { Builder } from './builder';
+import { Raw } from './raw';
+import { template } from './template';
+import { BuildResult, FieldType } from './types';
 
-const Raw = require('./raw');
-const template = require('./template');
-
-class AttrBuilder {
-  /**
-   * @param {Builder} builder
-   * @returns {[string, any[]]}
-   */
-  build(builder) {
+export class AttrBuilder {
+  build(builder: Builder): BuildResult {
     throw new Error('NotImplementedError');
   }
 }
 
-class Fn extends AttrBuilder {
-  /**
-   * @param {string} fn 
-   * @param {*} [args]
-   */
-  constructor(fn, args) {
+export class Fn extends AttrBuilder {
+  _fn: string;
+  _args: any;
+
+  constructor(fn: string, args?: any) {
     super();
     this._fn = fn;
     this._args = args;
   }
 
-  /**
-   * @param {Builder} builder
-   */
-  build(builder) {
+  override build(builder: Builder): BuildResult {
     return [`${this._fn}(${this._args ? builder.quote(this._args) : ''})`];
   }
 }
 
-class Op extends AttrBuilder {
-  /**
-   * @param {QBuilder|any} [prep]
-   */
-  constructor(prep) {
+export class Op extends AttrBuilder {
+  _items: (string | AttrBuilder | Op)[] = [];
+  _params: any[] = [];
+
+  constructor(prep: string | number | Raw | AttrBuilder) {
     super();
-    this._items = [];
-    this._params = [];
     this.param(prep);
   }
 
-  param(value) {
+  param(value: string | number | Raw | AttrBuilder) {
     if (value instanceof Raw) {
       this._items.push(value.toString());
     } else if (value instanceof AttrBuilder) {
@@ -60,10 +47,8 @@ class Op extends AttrBuilder {
 
   /**
    * 运算操作
-   * @param {string} op
-   * @param {string|number|((op: Op) => Op)} value
    */
-  op(op, value) {
+  op(op: string, value: string | number | Op) {
     this._items.push(op);
     if (value instanceof Op) {
       this._items.push('(');
@@ -76,11 +61,7 @@ class Op extends AttrBuilder {
     return this;
   }
 
-  /**
-   * @param {import('./builder')} builder 
-   * @returns 
-   */
-  build(builder) {
+  override build(builder: Builder): BuildResult {
     return [
       this._items.map(i => i instanceof AttrBuilder ? i.build(builder)[0] : i).join(' '),
       this._params.length ? this._params : undefined,
@@ -88,34 +69,31 @@ class Op extends AttrBuilder {
   }
 }
 
-class Quote extends AttrBuilder {
-  constructor(col) {
+export class Quote extends AttrBuilder {
+  private _col: FieldType;
+
+  constructor(col: FieldType) {
     super();
     this._col = col;
   }
 
-  /**
-   * @param {import('./builder')} builder 
-   * @returns 
-   */
-  build(builder) {
-    return [builder.quote(this._col)];
+  override build(builder: Builder): BuildResult {
+    return [builder.quote(this._col).toString()];
   }
 }
 
 class Template extends AttrBuilder {
-  constructor(strings, args) {
+  private _strings: string[];
+  private _args: any[];
+
+  constructor(strings: string[], args: any[]) {
     super();
-    this.strings = strings;
-    this.args = args;
+    this._strings = strings;
+    this._args = args;
   }
 
-  /**
-   * @param {import('./builder')} builder 
-   * @returns 
-   */
-  build(builder) {
-    const { sql, params } = template(builder, this.strings, ...this.args);
+  override build(builder: Builder): BuildResult {
+    const { sql, params } = template(builder, this._strings, ...this._args);
     return [sql, params];
   }
 }
@@ -123,48 +101,40 @@ class Template extends AttrBuilder {
 /**
  * 常用字段查询工具
  */
-const AB = {
-  raw(str) {
+export const AB = {
+  raw(str: string) {
     return new Raw(str);
   },
-  quote(col) {
+  quote(col: string) {
     return new Quote(col);
   },
-  SQL(strings, ...args) {
+  SQL(strings: string[], ...args: any[]) {
     return new Template(strings, args);
   },
-  op(prep) {
+  op(prep: any) {
     return new Op(prep);
   },
   count(col = '*') {
     return new Fn('COUNT', col);
   },
-  avg(col) {
+  avg(col: string) {
     return new Fn('AVG', col);
   },
-  sum(col) {
+  sum(col: string) {
     return new Fn('SUM', col);
   },
-  min(col) {
+  min(col: string) {
     return new Fn('MIN', col);
   },
-  max(col) {
+  max(col: string) {
     return new Fn('MAX', col);
   },
   // `col` + 1
-  incr(col, val) {
+  incr(col: string, val: number) {
     return AB.op(AB.quote(col)).op('+', val || 1);
   },
   // `col` - 1
-  decr(col, val) {
+  decr(col: string, val: number) {
     return AB.op(AB.quote(col)).op('-', val || 1);
   },
-};
-
-module.exports = {
-  AttrBuilder,
-  Fn,
-  Op,
-  Quote,
-  AB,
 };

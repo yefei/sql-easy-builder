@@ -1,16 +1,21 @@
 {
   "name": "sql-easy-builder",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "description": "SQL easy builder",
-  "main": "index.js",
+  "exports": "./dist/index.js",
   "repository": "https://github.com/yefei/sql-easy-builder",
   "author": "YeFei",
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "prepublish": "tsc",
     "lint": "eslint --max-warnings 0",
-    "test": "mocha"
+    "test": "mocha --enable-source-maps"
   },
   "devDependencies": {
+    "@types/lodash.isplainobject": "^4.0.6",
     "eslint": "^7.17.0",
     "mocha": "^8.2.1"
   },

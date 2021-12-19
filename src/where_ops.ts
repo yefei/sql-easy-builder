@@ -1,6 +1,4 @@
-'use strict';
-
-exports.flat = {
+export const flat: { [key: string]: string } = {
   eq: '=',
   ne: '!=',
   gte: '>=',
@@ -18,14 +16,14 @@ exports.flat = {
   notregexp: 'NOT REGEXP',
 };
 
-exports.other = {
+export const other: { [key: string]: string } = {
   in: 'IN',
   notin: 'NOT IN',
   between: 'BETWEEN',
   notbetween: 'NOT BETWEEN',
 };
 
-exports.all = {
-  ...exports.flat,
-  ...exports.other,
+export const all: { [key: string]: string } = {
+  ...flat,
+  ...other,
 };

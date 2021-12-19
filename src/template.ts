@@ -1,19 +1,17 @@
-'use strict';
+import { Builder } from './builder';
+import { Raw } from './raw';
+import { ValueType } from './types';
 
-const Raw = require('./raw');
 const quoteRe = /\{([\w_.]+)\}/g;
 
 /**
  * ES2015 template
  * T`SELECT * FROM {user} WHERE {age} > ${100}`
  *    => SELECT * FROM `user` WHERE `age` > ?; [100]
- * @param {import('./builder')} builder
- * @param {*[]} strings
- * @param  {...any} args
  */
-function template(builder, strings, ...args) {
-  const sql = [];
-  const params = [];
+export function template(builder: Builder, strings: string[], ...args: ValueType[]) {
+  const sql: string[] = [];
+  const params: any[] = [];
   if (args.length === 0) {
     sql.push(strings[0]);
   } else {
@@ -38,11 +36,9 @@ function template(builder, strings, ...args) {
     strings[strings.length - 1] && sql.push(strings[strings.length - 1]);
   }
   return {
-    sql: sql.join('').replace(quoteRe, (match, p1) => {
-      return builder.quote(p1);
+    sql: sql.join('').replace(quoteRe, (_match, p1) => {
+      return builder.quote(p1).toString();
     }),
     params
   };
 }
-
-module.exports = template;

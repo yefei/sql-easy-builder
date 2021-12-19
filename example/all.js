@@ -1,6 +1,6 @@
 'use strict';
 
-const { Builder } = require('..');
+const { Builder } = require('../dist/index');
 
 // demo
 
