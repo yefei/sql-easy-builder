@@ -1,8 +1,9 @@
 {
   "name": "sql-easy-builder",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "SQL easy builder",
   "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "repository": "https://github.com/yefei/sql-easy-builder",
   "author": "YeFei",
   "license": "MIT",
