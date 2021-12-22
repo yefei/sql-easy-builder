@@ -1,73 +1,9 @@
 import { Builder } from './builder';
 import isPlainObject = require('lodash.isplainobject');
 import { all as operatorMap } from './where_ops';
-import { BuildResult, ValueType } from './types';
+import { BuildResult, JsonWhere, ValueType } from './types';
 import { Raw } from './raw';
 import { AttrBuilder } from './attr_builder';
-
-export interface JsonWhereOp {
-  /** = */
-  $eq: ValueType;
-
-  /** != */
-  $ne: ValueType;
-
-  /** >= */
-  $gte: ValueType;
-
-  /** > */
-  $gt: ValueType;
-
-  /** <= */
-  $lte: ValueType;
-
-  /** < */
-  $lt: ValueType;
-
-  /** IS */
-  $is: ValueType;
-
-  /** IS NOT */
-  $isnot: ValueType;
-
-  /** IS NOT */
-  $not: ValueType;
-
-  /** LIKE */
-  $like: ValueType;
-
-  /** NOT LIKE */
-  $notlike: ValueType;
-
-  /** ILIKE */
-  $ilike: ValueType;
-
-  /** NOT ILIKE */
-  $notilike: ValueType;
-
-  /** REGEXP */
-  $regexp: ValueType;
-
-  /** NOT REGEXP */
-  $notregexp: ValueType;
-
-  $in: ValueType[],
-  $notin: ValueType[],
-  $between: [start: ValueType, end: ValueType],
-  $notbetween: [start: ValueType, end: ValueType],
-
-  /** 字段转译 */
-  $quote: string;
-
-  /** 原始内容 */
-  $raw: string;
-}
-
-export interface JsonWhere {
-  $or?: JsonWhere | JsonWhere[];
-  $and?: JsonWhere | JsonWhere[];
-  [field: string]: JsonWhereOp | JsonWhere | JsonWhere[] | ValueType | ValueType[];
-}
 
 export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND'): BuildResult {
   const sql: string[] = [];
