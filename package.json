@@ -11,7 +11,7 @@
     "dist"
   ],
   "scripts": {
-    "prepublishOnly": "tsc --build --clean && tsc",
+    "prepublishOnly": "rm -fr dist && tsc",
     "test": "mocha --enable-source-maps"
   },
   "devDependencies": {

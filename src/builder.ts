@@ -16,7 +16,7 @@ export class Builder {
   private _one: boolean = false;
   private _nestTables: boolean = false;
 
-  constructor(quote: (str: string) => string) {
+  constructor(quote?: (str: string) => string) {
     this._quote = quote || defaultQuote;
   }
 
