@@ -302,7 +302,7 @@ export class Builder {
    * func('COUNT', '*') => COUNT(*)
    * func('COUNT', '*', 'c') => COUNT(*) AS c
    */
-  func(name: string, exp: FieldType, alias: string): Raw {
+  func(name: string, exp: FieldType, alias: FieldType): Raw {
     const f = this.raw(`${name}(${exp ? this.quote(exp) : ''})`);
     return alias ? this.as(f, alias) : f;
   }
@@ -312,7 +312,7 @@ export class Builder {
    * count('id') => SELECT COUNT(id)
    * count('id', 'user_count') => SELECT COUNT(id) AS user_count
    */
-  count(column = '*', alias?: string) {
+  count(column: FieldType = '*', alias?: FieldType) {
     return this.select(this.func('COUNT', column, alias));
   }
 
