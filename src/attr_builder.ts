@@ -83,10 +83,10 @@ export class Quote extends AttrBuilder {
 }
 
 class Template extends AttrBuilder {
-  private _strings: string[];
+  private _strings: TemplateStringsArray;
   private _args: any[];
 
-  constructor(strings: string[], args: any[]) {
+  constructor(strings: TemplateStringsArray, args: any[]) {
     super();
     this._strings = strings;
     this._args = args;
@@ -108,7 +108,7 @@ export const AB = {
   quote(col: string) {
     return new Quote(col);
   },
-  SQL(strings: string[], ...args: any[]) {
+  SQL(strings: TemplateStringsArray, ...args: any[]) {
     return new Template(strings, args);
   },
   op(prep: any) {

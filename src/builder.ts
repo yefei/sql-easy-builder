@@ -91,7 +91,7 @@ export class Builder {
    * SQL`SELECT * FROM {user} WHERE {age} > ${100}`
    *    => SELECT * FROM `user` WHERE `age` > ?; [100]
    */
-  SQL(strings: string[], ...args: ValueType[]) {
+  SQL(strings: TemplateStringsArray, ...args: ValueType[]) {
     const { sql, params } = template(this, strings, ...args);
     return this.append(sql, params);
   }

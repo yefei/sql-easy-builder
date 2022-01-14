@@ -1,6 +1,5 @@
 import { Builder } from './builder';
 import { Raw } from './raw';
-import { ValueType } from './types';
 
 const quoteRe = /\{([\w_.]+)\}/g;
 
@@ -9,7 +8,7 @@ const quoteRe = /\{([\w_.]+)\}/g;
  * T`SELECT * FROM {user} WHERE {age} > ${100}`
  *    => SELECT * FROM `user` WHERE `age` > ?; [100]
  */
-export function template(builder: Builder, strings: string[], ...args: ValueType[]) {
+export function template(builder: Builder, strings: TemplateStringsArray, ...args: any[]) {
   const sql: string[] = [];
   const params: any[] = [];
   if (args.length === 0) {
