@@ -15,10 +15,6 @@
     "test": "mocha --enable-source-maps"
   },
   "devDependencies": {
-    "@types/lodash.isplainobject": "^4.0.6",
     "mocha": "^8.2.1"
-  },
-  "dependencies": {
-    "lodash.isplainobject": "^4.0.6"
   }
 }

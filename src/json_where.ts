@@ -1,5 +1,5 @@
 import { Builder } from './builder';
-import isPlainObject = require('lodash.isplainobject');
+import { isPlainObject } from './utils';
 import { all as operatorMap } from './where_ops';
 import { BuildResult, JsonWhere, ValueType } from './types';
 import { Raw } from './raw';
