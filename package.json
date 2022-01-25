@@ -11,10 +11,11 @@
     "dist"
   ],
   "scripts": {
-    "prepublishOnly": "rm -fr dist && tsc",
+    "prepublishOnly": "rimraf dist && tsc",
     "test": "mocha --enable-source-maps"
   },
   "devDependencies": {
-    "mocha": "^8.2.1"
+    "mocha": "^8.2.1",
+    "rimraf": "^3.0.2"
   }
 }
