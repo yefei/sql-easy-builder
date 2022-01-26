@@ -470,4 +470,15 @@ describe('Builder', function() {
       [],
     ]);
   });
+
+  it("update(AB.incr(0))", function() {
+    const q = new Builder();
+    q.update('test', {
+      a: AB.incr('*', 0),
+    });
+    assert.deepStrictEqual(q.build(), [
+      'UPDATE `test` SET `a` = * + ?',
+      [0],
+    ]);
+  });
 });

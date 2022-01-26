@@ -130,11 +130,13 @@ export const AB = {
     return new Fn('MAX', col);
   },
   // `col` + 1
-  incr(col: string, val: number) {
-    return AB.op(AB.quote(col)).op('+', val || 1);
+  incr(col: string, val?: number) {
+    if (typeof val === 'undefined') val = 1;
+    return AB.op(AB.quote(col)).op('+', val);
   },
   // `col` - 1
-  decr(col: string, val: number) {
-    return AB.op(AB.quote(col)).op('-', val || 1);
+  decr(col: string, val?: number) {
+    if (typeof val === 'undefined') val = 1;
+    return AB.op(AB.quote(col)).op('-', val);
   },
 };
