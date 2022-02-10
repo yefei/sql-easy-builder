@@ -6,7 +6,7 @@ import { Builder } from './builder';
 export type FieldType = string | Raw | AttrBuilder;
 export type ValueType = string | Raw | AttrBuilder | number | boolean | Date;
 export type BuildResult = [sql: string, params?: ValueType[]];
-export type ResultRow = { [column: string]: ValueType };
+export type ValueRow = { [column: string]: ValueType };
 export type WhereType = JsonWhere | ((where: Where) => Where);
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
 

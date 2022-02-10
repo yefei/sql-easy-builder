@@ -3,7 +3,7 @@ import { AttrBuilder, Op } from './attr_builder';
 import { jsonWhere } from './json_where';
 import { Raw } from './raw';
 import { template } from './template';
-import { BuildResult, FieldsType, FieldType, ResultRow, ValueType, WhereType } from './types';
+import { BuildResult, FieldsType, FieldType, ValueRow, ValueType, WhereType } from './types';
 
 function defaultQuote(str: string) {
   return '`' + String(str).replace(/`/g, '``') + '`';
@@ -171,7 +171,7 @@ export class Builder {
   /**
    * update('user', { name: 'yf', age: 18, }) => UPDATE user SET name = ?, age = ?; ['yf', 18]
    */
-  update(table: FieldType | FieldType[], columns: ResultRow) {
+  update(table: FieldType | FieldType[], columns: ValueRow) {
     this.append('UPDATE');
     this.append(Array.isArray(table) ? table.map(i => this.quote(i).toString()).join(', ') : this.quote(table).toString());
     this.append('SET');
@@ -195,7 +195,7 @@ export class Builder {
   /**
    * insert('user', { name: 'yf', age: 18, }) => INSERT INTO user (name, age) VALUES (?, ?); ['yf', 18]
    */
-  insert(table: FieldType, columns: ResultRow) {
+  insert(table: FieldType, columns: ValueRow) {
     this.append('INSERT INTO');
     this.append(this.quote(table).toString());
     this.append('(');
