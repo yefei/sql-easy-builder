@@ -2,7 +2,7 @@ import { Where } from '.';
 import { AttrBuilder, Op } from './attr_builder';
 import { jsonWhere } from './json_where';
 import { Raw } from './raw';
-import { template } from './template';
+import { template, TemplateArg } from './template';
 import { BuildResult, FieldsType, FieldType, ValueRow, ValueType, WhereType } from './types';
 
 function defaultQuote(str: string) {
@@ -91,7 +91,7 @@ export class Builder {
    * SQL`SELECT * FROM {user} WHERE {age} > ${100}`
    *    => SELECT * FROM `user` WHERE `age` > ?; [100]
    */
-  SQL(strings: TemplateStringsArray, ...args: ValueType[]) {
+  SQL(strings: TemplateStringsArray, ...args: TemplateArg[]) {
     const { sql, params } = template(this, strings, ...args);
     return this.append(sql, params);
   }

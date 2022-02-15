@@ -3,12 +3,15 @@ import { Raw } from './raw';
 
 const quoteRe = /\{([\w_.]+)\}/g;
 
+export type TemplateArgType = string | number | boolean | Date;
+export type TemplateArg = Raw | TemplateArgType | TemplateArgType[];
+
 /**
  * ES2015 template
  * T`SELECT * FROM {user} WHERE {age} > ${100}`
  *    => SELECT * FROM `user` WHERE `age` > ?; [100]
  */
-export function template(builder: Builder, strings: TemplateStringsArray, ...args: any[]) {
+export function template(builder: Builder, strings: TemplateStringsArray, ...args: TemplateArg[]) {
   const sql: string[] = [];
   const params: any[] = [];
   if (args.length === 0) {
