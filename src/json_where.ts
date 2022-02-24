@@ -1,11 +1,11 @@
 import { Builder } from './builder';
 import { isPlainObject } from './utils';
 import { all as operatorMap } from './where_ops';
-import { BuildResult, JsonWhere, ValueType } from './types';
+import { BuildResult, JsonWhereParam, ValueType } from './types';
 import { Raw } from './raw';
 import { AttrBuilder } from './attr_builder';
 
-export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND'): BuildResult {
+export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = 'AND'): BuildResult {
   const sql: string[] = [];
   const params: ValueType[] = [];
 

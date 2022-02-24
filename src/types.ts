@@ -7,7 +7,7 @@ export type FieldType = string | Raw | AttrBuilder;
 export type ValueType = string | Raw | AttrBuilder | number | boolean | Date;
 export type BuildResult = [sql: string, params?: ValueType[]];
 export type ValueRow = { [column: string]: ValueType };
-export type WhereType = JsonWhere | ((where: Where) => Where);
+export type WhereType = JsonWhereParam | ((where: Where) => Where);
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
 
 interface $Q {
@@ -100,7 +100,24 @@ export interface JsonWhere extends FieldWhere {
   $and?: FieldWhere[];
 }
 
+export type JsonWhereParam = JsonWhere | {
+  [name: string]: JsonWhere | AttrBuilder | Raw;
+};
+
 /*
+function aaa(j:JsonWhereParam) {}
+
+aaa({
+  ddd: {
+    $or: [
+      { aaa: 1 }
+    ],
+    kkk: 1,
+  },
+  ccc : AB.SQL`aaa`,
+});
+
+
 const where = {
   advertise: {
     status: 1,
