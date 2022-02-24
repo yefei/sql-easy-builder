@@ -86,7 +86,7 @@ export interface JsonWhereOp extends $Q {
 /**
  * 表字段操作
  */
-type FieldWhere = { [field: string]: ValueType | ValueType[] | JsonWhereOp | FieldWhere[] };
+export type FieldWhere = { [field: string]: ValueType | ValueType[] | JsonWhereOp | FieldWhere[] };
 
 export interface JsonWhere extends FieldWhere {
   /**
@@ -100,12 +100,8 @@ export interface JsonWhere extends FieldWhere {
   $and?: FieldWhere[];
 }
 
-export interface JsonWhereTable {
-  [table: string]: JsonWhere;
-}
-
 /*
-const where: JsonWhereTable = {
+const where = {
   advertise: {
     status: 1,
     type_id: [1],
@@ -115,7 +111,7 @@ const where: JsonWhereTable = {
     $or: [
       { exactly_type: { $gt: 100 } },
     ],
-  },
+  } as JsonWhere,
   ad_type: {
     type: 1,
   },
