@@ -10,64 +10,7 @@ export type ValueRow = { [column: string]: ValueType };
 export type WhereType = JsonWhere | ((where: Where) => Where);
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
 
-export interface JsonWhereOp {
-  /** = */
-  $eq?: ValueType;
-
-  /** != */
-  $ne?: ValueType;
-
-  /** \>= */
-  $gte?: ValueType;
-
-  /** \> */
-  $gt?: ValueType;
-
-  /** \<= */
-  $lte?: ValueType;
-
-  /** \< */
-  $lt?: ValueType;
-
-  /** IS */
-  $is?: ValueType;
-
-  /** IS NOT */
-  $isnot?: ValueType;
-
-  /** IS NOT */
-  $not?: ValueType;
-
-  /** LIKE */
-  $like?: ValueType;
-
-  /** NOT LIKE */
-  $notlike?: ValueType;
-
-  /** ILIKE */
-  $ilike?: ValueType;
-
-  /** NOT ILIKE */
-  $notilike?: ValueType;
-
-  /** REGEXP */
-  $regexp?: ValueType;
-
-  /** NOT REGEXP */
-  $notregexp?: ValueType;
-
-  /** IN */
-  $in?: ValueType[],
-
-  /** NOT IN */
-  $notin?: ValueType[],
-
-  /** BETWEEN [start] AND [end] */
-  $between?: [start: ValueType, end: ValueType],
-
-  /** NOT BETWEEN [start] AND [end] */
-  $notbetween?: [start: ValueType, end: ValueType],
-
+interface $Q {
   /** 转译为字段 */
   $quote?: string;
 
@@ -75,33 +18,102 @@ export interface JsonWhereOp {
   $raw?: string;
 }
 
-export interface JsonWhere {
+type $Value = ValueType | $Q;
+
+export interface JsonWhereOp extends $Q {
+  /** = */
+  $eq?: $Value;
+
+  /** != */
+  $ne?: $Value;
+
+  /** \>= */
+  $gte?: $Value;
+
+  /** \> */
+  $gt?: $Value;
+
+  /** \<= */
+  $lte?: $Value;
+
+  /** \< */
+  $lt?: $Value;
+
+  /** IS */
+  $is?: $Value;
+
+  /** IS NOT */
+  $isnot?: $Value;
+
+  /** IS NOT */
+  $not?: $Value;
+
+  /** LIKE */
+  $like?: $Value;
+
+  /** NOT LIKE */
+  $notlike?: $Value;
+
+  /** ILIKE */
+  $ilike?: $Value;
+
+  /** NOT ILIKE */
+  $notilike?: $Value;
+
+  /** REGEXP */
+  $regexp?: $Value;
+
+  /** NOT REGEXP */
+  $notregexp?: $Value;
+
+  /** IN */
+  $in?: $Value[],
+
+  /** NOT IN */
+  $notin?: $Value[],
+
+  /** BETWEEN [start] AND [end] */
+  $between?: [start: $Value, end: $Value],
+
+  /** NOT BETWEEN [start] AND [end] */
+  $notbetween?: [start: $Value, end: $Value],
+
+  // f15: { $or: { $eq: 'f15-1', $gt: 'f15-2', $or: { $eq: 16, $gt: 18 } } },
+  $or?: JsonWhereOp;
+  $and?: JsonWhereOp;
+}
+
+/**
+ * 表字段操作
+ */
+type FieldWhere = { [field: string]: ValueType | ValueType[] | JsonWhereOp | FieldWhere[] };
+
+export interface JsonWhere extends FieldWhere {
   /**
    * 对象以下字段执行 OR 查询
    */
-  $or?: JsonWhere | JsonWhere[];
+  $or?: FieldWhere[];
 
   /**
    * 对象以下字段执行 AND 查询
    */
-  $and?: JsonWhere | JsonWhere[];
+  $and?: FieldWhere[];
+}
 
-  /**
-   * 数据库字段操作
-   */
-  [field: string]: JsonWhereOp | JsonWhere | JsonWhere[] | ValueType | ValueType[];
+export interface JsonWhereTable {
+  [table: string]: JsonWhere;
 }
 
 /*
-const where: JsonWhere & { advertise: JsonWhere & { $or: JsonWhere[] }  } = {
+const where: JsonWhereTable = {
   advertise: {
-    status: 1, // 仅限开启状态的
+    status: 1,
     type_id: [1],
     start_time: { $lt: new Date() },
     end_time: { $gt: new Date() },
     deleted_at: null,
     $or: [
-      { exactly_type: 0 },
+      { exactly_type: { $gt: 100 } },
     ],
   },
   ad_type: {
