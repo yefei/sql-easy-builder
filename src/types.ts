@@ -3,8 +3,10 @@ import { AttrBuilder } from './attr_builder';
 import { Where } from './where';
 import { Builder } from './builder';
 
-export type FieldType = string | Raw | AttrBuilder;
-export type ValueType = string | Raw | AttrBuilder | number | boolean | Date;
+export type BasicType = string | number | boolean | Date;
+export type SQLTemplateArg = Raw | AttrBuilder | BasicType | BasicType[];
+export type FieldType = Raw | AttrBuilder | string;
+export type ValueType = Raw | AttrBuilder | BasicType;
 export type BuildResult = [sql: string, params?: ValueType[]];
 export type ValueRow = { [column: string]: ValueType };
 export type WhereType = JsonWhereParam | ((where: Where) => Where);

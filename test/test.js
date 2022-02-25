@@ -481,4 +481,14 @@ describe('Builder', function() {
       [0],
     ]);
   });
+
+  it("AB.SQL + AB.SQL", function() {
+    const w = AB.SQL`WHERE {a} = ${100}`;
+    const s = AB.SQL`SELECT * FROM ${w}`;
+    const q = new Builder();
+    assert.deepStrictEqual(q.SQL`${s}`.build(), [
+      'SELECT * FROM WHERE `a` = ?',
+      [100],
+    ]);
+  });
 });

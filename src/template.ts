@@ -1,17 +1,15 @@
+import { AttrBuilder, SQLTemplateArg } from '.';
 import { Builder } from './builder';
 import { Raw } from './raw';
 
 const quoteRe = /\{([\w_.]+)\}/g;
-
-export type TemplateArgType = string | number | boolean | Date;
-export type TemplateArg = Raw | TemplateArgType | TemplateArgType[];
 
 /**
  * ES2015 template
  * T`SELECT * FROM {user} WHERE {age} > ${100}`
  *    => SELECT * FROM `user` WHERE `age` > ?; [100]
  */
-export function template(builder: Builder, strings: TemplateStringsArray, ...args: TemplateArg[]) {
+export function template(builder: Builder, strings: TemplateStringsArray, ...args: SQLTemplateArg[]) {
   const sql: string[] = [];
   const params: any[] = [];
   if (args.length === 0) {
@@ -25,6 +23,12 @@ export function template(builder: Builder, strings: TemplateStringsArray, ...arg
       // }
       if (arg instanceof Raw) {
         sql.push(arg.toString());
+        continue;
+      }
+      if (arg instanceof AttrBuilder) {
+        const [_sql, _params] = arg.build(builder);
+        sql.push(_sql);
+        _params && params.push(..._params);
         continue;
       }
       if (Array.isArray(arg)) {

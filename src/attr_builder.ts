@@ -1,7 +1,7 @@
 import { Builder } from './builder';
 import { Raw } from './raw';
 import { template } from './template';
-import { BuildResult, FieldType } from './types';
+import { BuildResult, FieldType, SQLTemplateArg } from './types';
 
 export class AttrBuilder {
   build(builder: Builder): BuildResult {
@@ -84,9 +84,9 @@ export class Quote extends AttrBuilder {
 
 class Template extends AttrBuilder {
   private _strings: TemplateStringsArray;
-  private _args: any[];
+  private _args: SQLTemplateArg[];
 
-  constructor(strings: TemplateStringsArray, args: any[]) {
+  constructor(strings: TemplateStringsArray, args: SQLTemplateArg[]) {
     super();
     this._strings = strings;
     this._args = args;
@@ -108,7 +108,7 @@ export const AB = {
   quote(col: string) {
     return new Quote(col);
   },
-  SQL(strings: TemplateStringsArray, ...args: any[]) {
+  SQL(strings: TemplateStringsArray, ...args: SQLTemplateArg[]) {
     return new Template(strings, args);
   },
   op(prep: any) {
