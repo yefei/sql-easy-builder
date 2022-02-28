@@ -88,18 +88,18 @@ export interface JsonWhereOp extends $Q {
 /**
  * 表字段操作
  */
-export type FieldWhere = { [field: string]: ValueType | ValueType[] | JsonWhereOp | FieldWhere[] };
+export type FieldWhere = { [field: string]: ValueType | ValueType[] | JsonWhereOp | FieldWhere | FieldWhere[] };
 
 export interface JsonWhere extends FieldWhere {
   /**
    * 对象以下字段执行 OR 查询
    */
-  $or?: FieldWhere[];
+  $or?: FieldWhere | FieldWhere[];
 
   /**
    * 对象以下字段执行 AND 查询
    */
-  $and?: FieldWhere[];
+  $and?: FieldWhere | FieldWhere[];
 }
 
 export type JsonWhereParam = JsonWhere | {
