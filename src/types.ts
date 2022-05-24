@@ -94,12 +94,12 @@ export interface JsonWhere extends FieldWhere {
   /**
    * 对象以下字段执行 OR 查询
    */
-  $or?: FieldWhere | FieldWhere[];
+  $or?: FieldWhere | FieldWhere[] | Raw[] | AttrBuilder[];
 
   /**
    * 对象以下字段执行 AND 查询
    */
-  $and?: FieldWhere | FieldWhere[];
+  $and?: FieldWhere | FieldWhere[] | Raw[] | AttrBuilder[];
 }
 
 export type JsonWhereParam = JsonWhere | {
