@@ -454,11 +454,11 @@ describe('Builder', function() {
 
   it('jsonWhere($or:[])', function() {
     const q = new Builder().where({
-      $and: [],
-      $or: [],
+      $and: AB.SQL`andtest`,
+      $or: [AB.SQL`or1`, AB.SQL`or2`],
     });
     assert.deepStrictEqual(q.build(), [
-      '',
+      'WHERE andtest AND ((or1) OR (or2))',
       [],
     ]);
   });

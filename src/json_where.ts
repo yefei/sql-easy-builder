@@ -31,6 +31,16 @@ export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = '
   function fieldObject(key: string, value: any) {
     if (key === '$or' || key === '$and') {
       const _con = key.substring(1).toUpperCase();
+      if (value instanceof Raw) {
+        sql.push(value.toString());
+        return;
+      }
+      if (value instanceof AttrBuilder) {
+        const [_sql, _params] = value.build(builder);
+        sql.push(_sql);
+        _params && params.push(..._params);
+        return;
+      }
       // $or: [
       //   { f8: 'f8' },
       //   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
@@ -45,13 +55,15 @@ export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = '
         });
         sql.push(_sql.length === 1 ? _sql[0] : `(${_sql.join(` ${_con} `)})`);
         params.push(..._params);
+        return;
       }
 
       // $or: { f8: 'f8', f9: 'f9' }
-      else if (isPlainObject(value)) {
+      if (isPlainObject(value)) {
         const [_sqls, _params] = jsonWhere(builder, value, _con);
         sql.push(`(${_sqls})`);
         params.push(..._params);
+        return;
       }
       return;
     }
@@ -64,6 +76,10 @@ export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = '
   function appendOp(key: string, op: string, value: any) {
     // ignore undefined
     if (value === undefined) throw new Error(`${key} value is undefined`);
+
+    if (key === '$or' || key === '$and') {
+      return fieldObject(key, value);
+    }
 
     // $op | key.key
     if (op) {
