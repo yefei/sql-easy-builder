@@ -491,4 +491,19 @@ describe('Builder', function() {
       [100],
     ]);
   });
+
+  it('insert([])', function() {
+    const q = new Builder().insert('user', [{
+      name: 'xiaohong',
+      age: 18,
+    }, {
+      name: 'xiaohong222',
+      age: 22,
+    }]);
+
+    assert.deepStrictEqual(q.build(), [
+      'INSERT INTO `user` ( `name`, `age` ) VALUES ( ?, ? ), ( ?, ? )',
+      ['xiaohong', 18, 'xiaohong222', 22],
+    ]);
+  });
 });

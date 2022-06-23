@@ -195,15 +195,18 @@ export class Builder {
   /**
    * insert('user', { name: 'yf', age: 18, }) => INSERT INTO user (name, age) VALUES (?, ?); ['yf', 18]
    */
-  insert(table: FieldType, columns: ValueRow) {
+  insert(table: FieldType, columns: ValueRow | ValueRow[]) {
     this.append('INSERT INTO');
     this.append(this.quote(table).toString());
     this.append('(');
-    const _keys = Object.keys(columns);
+    if (!Array.isArray(columns)) {
+      columns = [columns];
+    }
+    const _keys = Object.keys(columns[0]);
     this.append(_keys.map(i => this.quote(i)).join(', '));
     this.append(') VALUES (');
-    this.append(_keys.map(i => {
-      const column = columns[i];
+    this.append(columns.map(line => _keys.map(i => {
+      const column = line[i];
       if (column instanceof Raw) {
         return column.toString();
       }
@@ -212,9 +215,9 @@ export class Builder {
         _params && this._params.push(..._params);
         return _sql;
       }
-      this._params.push(columns[i]);
+      this._params.push(line[i]);
       return '?';
-    }).join(', '));
+    }).join(', ')).join(' ), ( '));
     this.append(')');
     return this;
   }
