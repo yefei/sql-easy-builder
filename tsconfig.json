@@ -5,9 +5,8 @@
       "ES2019"
     ],
     "module": "commonjs",
-    "noImplicitAny": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": false,
     "declaration": true,
     "outDir": "./dist"
   },
