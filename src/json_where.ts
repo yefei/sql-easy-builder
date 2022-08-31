@@ -256,6 +256,7 @@ const test = {
 console.log(jsonWhere(builder, test));
 */
 
+/*
 const builder = new Builder();
 console.log(jsonWhere(builder, {
   a: 1,
@@ -268,3 +269,4 @@ console.log(jsonWhere(builder, {
     d: { $match: 'aaa bbb' }
   }
 }));
+*/
