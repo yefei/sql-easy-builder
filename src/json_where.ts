@@ -111,6 +111,17 @@ export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = '
       op = lastOp || null;
       value = builder.raw(value);
     }
+    else if (op === 'match') {
+      let modifier = '';
+      if (typeof value === 'object') {
+        if (value.modifier) {
+          modifier = ' ' + value.modifier;
+        }
+        value = value.expr;
+      }
+      sql.push(`MATCH(${builder.quote(key)}) AGAINST(${holder(value)}${modifier})`);
+      return;
+    }
 
     // f3: [1, 2, 3]
     // f7: { $between: ['f7-1', 'f7-2'] }
@@ -244,3 +255,16 @@ const test = {
 };
 console.log(jsonWhere(builder, test));
 */
+
+const builder = new Builder();
+console.log(jsonWhere(builder, {
+  a: 1,
+  $and: [
+    { $or: { b: 1, c: 2 } },
+    { $or: { d: 1, e: 2 } },
+  ],
+  b: {
+    $match: { expr: 'kkk', modifier: 'IN BOOLEAN MODE' },
+    d: { $match: 'aaa bbb' }
+  }
+}));

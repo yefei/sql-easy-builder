@@ -21,6 +21,7 @@ export const other: { [key: string]: string } = {
   notin: 'NOT IN',
   between: 'BETWEEN',
   notbetween: 'NOT BETWEEN',
+  match: 'MATCH',
 };
 
 export const all: { [key: string]: string } = {

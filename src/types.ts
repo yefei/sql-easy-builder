@@ -80,6 +80,12 @@ export interface JsonWhereOp extends $Q {
   /** NOT BETWEEN [start] AND [end] */
   $notbetween?: [start: $Value, end: $Value],
 
+  /** MATCH(field) AGAINST(value mode) */
+  $match?: string | {
+    expr: string,
+    modifier?: string,
+  },
+
   // f15: { $or: { $eq: 'f15-1', $gt: 'f15-2', $or: { $eq: 16, $gt: 18 } } },
   $or?: JsonWhereOp;
   $and?: JsonWhereOp;
