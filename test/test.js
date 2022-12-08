@@ -193,6 +193,13 @@ describe('Builder', function() {
     ]);
   });
 
+  it('select({ a: [], b: [x, { as }] })', function() {
+    assert.deepStrictEqual(new Builder().select({ a: ['*'], b: [ 'b1', 'b2', { b3: 'b3a' } ] }).build(), [
+      'SELECT `a`.*, `b`.`b1`, `b`.`b2`, `b`.`b3` AS `b3a`',
+      [],
+    ]);
+  });
+
   it('one', function() {
     assert.deepStrictEqual(new Builder().select().from('t').one().build(), [
       'SELECT * FROM `t` LIMIT ?',

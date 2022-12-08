@@ -105,7 +105,7 @@ export class Builder {
    */
   fields(fields: FieldsType) {
     const _fields: FieldType[] = [];
-    fields.forEach(item => {
+    const _match = (item:any) => {
       if (item instanceof AttrBuilder) {
         const [sql, params] = item.build(this);
         sql && _fields.push(this.raw(sql));
@@ -136,9 +136,15 @@ export class Builder {
             return;
           }
           if (Array.isArray(_value)) {
-            // { user: ['id', 'name'], profile: ['edu', 'work'] }
-            _value.forEach(k2 => _fields.push(`${k}.${k2}`));
-          } else if (typeof _value === 'object') {
+            // { user: ['id', 'name'], profile: ['edu', 'work', { as: 'newName' }] }
+            _value.forEach(k2 => {
+              if (k2 && typeof k2 === 'object') {
+                _match({ [k]: k2 });
+              } else {
+                _fields.push(`${k}.${k2}`);
+              }
+            });
+          } else if (_value && typeof _value === 'object') {
             // { user: { id: 'userId', name: 'user.Name' } }
             Object.keys(_value).forEach(k2 => _fields.push(this.as(`${k}.${k2}`, _value[k2])));
           } else {
@@ -149,7 +155,8 @@ export class Builder {
       } else {
         _fields.push(item);
       }
-    });
+    };
+    fields.forEach(item => _match(item));
     this.append(_fields.map(i => this.quote(i)).join(', '));
     return this;
   }
