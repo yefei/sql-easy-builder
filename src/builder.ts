@@ -275,8 +275,8 @@ export class Builder {
    * join('user', null, { 'user.id': b.q('other.id') }) => INNER JOIN user ON (user.id = other.id)
    * join('user', 'u', { 'u.id': b.q('other.id') }) => INNER JOIN user AS u ON (u.id = other.id)
    */
-  join(table: FieldType, alias?: FieldType, on?: WhereType, joinType = 'INNER') {
-    this.append(`${joinType} JOIN`);
+  join(table: FieldType, alias?: FieldType, on?: WhereType, joinType = 'INNER JOIN') {
+    this.append(joinType);
     this.fields([alias ? this.as(table, alias) : table]);
     const result = this._where(on);
     if (result && result[0]) {
@@ -287,11 +287,11 @@ export class Builder {
   }
 
   leftJoin(table: FieldType, alias?: FieldType, on?: WhereType) {
-    return this.join(table, alias, on, 'LEFT');
+    return this.join(table, alias, on, 'LEFT JOIN');
   }
 
   rightJoin(table: FieldType, alias?: FieldType, on?: WhereType) {
-    return this.join(table, alias, on, 'RIGHT');
+    return this.join(table, alias, on, 'RIGHT JOIN');
   }
 
   /**
