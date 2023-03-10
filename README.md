@@ -357,3 +357,8 @@ select().from('user').where(w => w
   )
 )
 ```
+
+## Changelog
+
+### 2.8.0
+- null 检查

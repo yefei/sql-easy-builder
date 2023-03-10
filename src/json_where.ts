@@ -51,7 +51,7 @@ export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = '
         value.forEach(item => {
           const [_item_sqls, _item_params] = jsonWhere(builder, item);
           _sql.push(`(${_item_sqls})`);
-          _params.push(..._item_params);
+          _item_params && _params.push(..._item_params);
         });
         sql.push(_sql.length === 1 ? _sql[0] : `(${_sql.join(` ${_con} `)})`);
         params.push(..._params);
@@ -62,7 +62,7 @@ export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = '
       if (isPlainObject(value)) {
         const [_sqls, _params] = jsonWhere(builder, value, _con);
         sql.push(`(${_sqls})`);
-        params.push(..._params);
+        _params && params.push(..._params);
         return;
       }
       return;
@@ -72,8 +72,8 @@ export function jsonWhere(builder: Builder, obj: JsonWhereParam, conjunction = '
     });
   }
 
-  let lastOp: string;
-  function appendOp(key: string, op: string, value: any) {
+  let lastOp: string | null;
+  function appendOp(key: string, op: string | null, value: any) {
     // ignore undefined
     if (value === undefined) throw new Error(`${key} value is undefined`);
 

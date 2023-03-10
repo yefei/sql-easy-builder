@@ -77,7 +77,7 @@ export class Builder {
   /**
    * append sql
    */
-  append(sql: string | Builder, params?: ValueType[]) {
+  append(sql: string | Builder, params: ValueType[] | null = null) {
     if (sql instanceof Builder) {
       [sql, params] = sql.build();
     }
@@ -185,7 +185,7 @@ export class Builder {
     this.append(Object.keys(columns).map(k => {
       const column = columns[k];
       let _sql: string = '?';
-      let _params: ValueType[] = [column];
+      let _params: ValueType[] | null = [column];
       if (column instanceof Raw) {
         _sql = column.toString();
         _params = null;
@@ -259,8 +259,8 @@ export class Builder {
    * where({ username: 'test' }) => WHERE username = ?; ['test']
    * where(w => w.eq('username', 'test')) => WHERE username = ?; ['test']
    */
-  private _where(query: WhereType) {
-    let result: BuildResult;
+  private _where(query?: WhereType) {
+    let result: BuildResult | undefined;
     if (typeof query === 'function') {
       result = query(new Where(this)).build();
     } else if (query instanceof Where) {
@@ -281,7 +281,7 @@ export class Builder {
     const result = this._where(on);
     if (result && result[0]) {
       this.append(`ON (${result[0]})`);
-      this._params.push(...result[1]);
+      result[1] && this._params.push(...result[1]);
     }
     return this;
   }
@@ -303,7 +303,7 @@ export class Builder {
     if (!result || !result[0]) return this;
     prep && this.append(prep);
     this.append(result[0]);
-    this._params.push(...result[1]);
+    result[1] && this._params.push(...result[1]);
     after && this.append(after);
     return this;
   }
@@ -312,7 +312,7 @@ export class Builder {
    * func('COUNT', '*') => COUNT(*)
    * func('COUNT', '*', 'c') => COUNT(*) AS c
    */
-  func(name: string, exp: FieldType, alias: FieldType): Raw {
+  func(name: string, exp: FieldType, alias?: FieldType): Raw {
     const f = this.raw(`${name}(${exp ? this.quote(exp) : ''})`);
     return alias ? this.as(f, alias) : f;
   }
@@ -399,7 +399,7 @@ export class Builder {
       const result = this._where(query);
       if (result && result[0]) {
         this.append(result[0]);
-        this._params.push(...result[1]);
+        result[1] && this._params.push(...result[1]);
       }
     }
     return this;

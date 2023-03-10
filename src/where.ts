@@ -39,7 +39,7 @@ export class Where {
   or(callback: (where: Where) => Where) {
     const result = callback(new Where(this._builder, 'OR')).build();
     this._sql.push(`( ${result[0]} )`);
-    this._params.push(...result[1]);
+    result[1] && this._params.push(...result[1]);
     return this;
   }
 

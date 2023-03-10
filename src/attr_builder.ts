@@ -20,7 +20,7 @@ export class Fn extends AttrBuilder {
   }
 
   override build(builder: Builder): BuildResult {
-    return [`${this._fn}(${this._args ? builder.quote(this._args) : ''})`];
+    return [`${this._fn}(${this._args ? builder.quote(this._args) : ''})`, null];
   }
 }
 
@@ -64,7 +64,7 @@ export class Op extends AttrBuilder {
   override build(builder: Builder): BuildResult {
     return [
       this._items.map(i => i instanceof AttrBuilder ? i.build(builder)[0] : i).join(' '),
-      this._params.length ? this._params : undefined,
+      this._params.length ? this._params : null,
     ];
   }
 }
@@ -78,7 +78,7 @@ export class Quote extends AttrBuilder {
   }
 
   override build(builder: Builder): BuildResult {
-    return [builder.quote(this._col).toString()];
+    return [builder.quote(this._col).toString(), null];
   }
 }
 
