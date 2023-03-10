@@ -360,5 +360,8 @@ select().from('user').where(w => w
 
 ## Changelog
 
+### 2.8.1
+- update() 方法忽略值为 undefined 的
+
 ### 2.8.0
 - null 检查

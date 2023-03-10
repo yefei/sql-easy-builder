@@ -178,12 +178,12 @@ export class Builder {
   /**
    * update('user', { name: 'yf', age: 18, }) => UPDATE user SET name = ?, age = ?; ['yf', 18]
    */
-  update(table: FieldType | FieldType[], columns: ValueRow) {
+  update(table: FieldType | FieldType[], columns: Partial<ValueRow>) {
     this.append('UPDATE');
     this.append(Array.isArray(table) ? table.map(i => this.quote(i).toString()).join(', ') : this.quote(table).toString());
     this.append('SET');
-    this.append(Object.keys(columns).map(k => {
-      const column = columns[k];
+    this.append(Object.entries(columns).map(([k, column]) => {
+      if (column === undefined) return;
       let _sql: string = '?';
       let _params: ValueType[] | null = [column];
       if (column instanceof Raw) {
@@ -195,7 +195,7 @@ export class Builder {
       }
       _params && this._params.push(..._params);
       return `${this.quote(k)} = ${_sql}`;
-    }).join(', '));
+    }).filter(i => !!i).join(', '));
     return this;
   }
 

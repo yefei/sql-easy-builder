@@ -513,4 +513,16 @@ describe('Builder', function() {
       ['xiaohong', 18, 'xiaohong222', 22],
     ]);
   });
+
+  it("update({ val: undefined })", function() {
+    const q = new Builder();
+    q.update('t', {
+      a: 1,
+      b: undefined,
+    });
+    assert.deepStrictEqual(q.build(), [
+      'UPDATE `t` SET `a` = ?',
+      [1],
+    ]);
+  });
 });
