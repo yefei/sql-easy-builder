@@ -3,13 +3,13 @@ import { AttrBuilder } from './attr_builder';
 import { Where } from './where';
 import { Builder } from './builder';
 
-export type BasicType = string | number | boolean | Date;
+export type BasicType = string | number | boolean | Date | null;
 export type SQLTemplateArg = Raw | AttrBuilder | BasicType | BasicType[];
 export type FieldType = Raw | AttrBuilder | string;
 export type ValueType = Raw | AttrBuilder | BasicType;
 export type BuildResult = [sql: string, params: ValueType[] | null];
 export type ValueRow = { [column: string]: ValueType };
-export type WhereType = JsonWhereParam | ((where: Where) => Where);
+export type WhereType = JsonWhere | Where | ((where: Where) => Where);
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
 
 interface $Q {
@@ -92,15 +92,11 @@ export interface JsonWhereOp extends $Q {
 }
 
 export interface JsonWhere {
-  [field: string]: ValueType | ValueType[] | JsonWhereOp | JsonWhere | JsonWhere[] | AttrBuilder[] | Raw[];
+  [field: string]: ValueType | ValueType[] | JsonWhereOp | JsonWhere | JsonWhere[];
 }
 
-export type JsonWhereParam = JsonWhere | {
-  [name: string]: JsonWhere | AttrBuilder | Raw;
-};
-
 /*
-function aaa(j:JsonWhereParam) {}
+function aaa(j:JsonWhere) {}
 
 aaa({
   ddd: {
@@ -113,7 +109,7 @@ aaa({
 });
 
 
-const where = {
+const where: JsonWhere = {
   advertise: {
     status: 1,
     type_id: [1],
@@ -123,7 +119,7 @@ const where = {
     $or: [
       { exactly_type: { $gt: 100 } },
     ],
-  } as JsonWhere,
+  },
   ad_type: {
     type: 1,
   },

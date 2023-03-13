@@ -525,4 +525,14 @@ describe('Builder', function() {
       [1],
     ]);
   });
+
+  it("where(Where)", function() {
+    const q = new Builder();
+    q.select('a').from('T');
+    q.where(new Where(q).eq('test', 1));
+    assert.deepStrictEqual(q.build(), [
+      'SELECT `a` FROM `T` WHERE `test` = ?',
+      [1],
+    ]);
+  });
 });

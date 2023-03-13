@@ -1,4 +1,5 @@
-import { AttrBuilder, SQLTemplateArg } from '.';
+import { AttrBuilder } from './attr_builder';
+import { SQLTemplateArg } from './types';
 import { Builder } from './builder';
 import { Raw } from './raw';
 

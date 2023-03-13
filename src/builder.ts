@@ -1,4 +1,4 @@
-import { Where } from '.';
+import { Where } from './where';
 import { AttrBuilder, Op } from './attr_builder';
 import { jsonWhere } from './json_where';
 import { Raw } from './raw';
