@@ -27,9 +27,9 @@ export function template(builder: Builder, strings: TemplateStringsArray, ...arg
         continue;
       }
       if (arg instanceof AttrBuilder) {
-        const [_sql, _params] = arg.build(builder);
-        sql.push(_sql);
-        _params && params.push(..._params);
+        const b = arg.build(builder);
+        sql.push(b.sql);
+        b.params && params.push(...b.params);
         continue;
       }
       if (Array.isArray(arg)) {

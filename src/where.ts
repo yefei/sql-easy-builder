@@ -38,8 +38,8 @@ export class Where {
 
   or(callback: (where: Where) => Where) {
     const result = callback(new Where(this._builder, 'OR')).build();
-    this._sql.push(`( ${result[0]} )`);
-    result[1] && this._params.push(...result[1]);
+    this._sql.push(`( ${result.sql} )`);
+    result.params && this._params.push(...result.params);
     return this;
   }
 
@@ -64,7 +64,10 @@ export class Where {
   }
 
   build(): BuildResult {
-    return [this._sql.join(` ${this._conjunction} `), this._params];
+    return {
+      sql: this._sql.join(` ${this._conjunction} `),
+      params: this._params,
+    };
   }
 
   eq(field: FieldType, value: ValueType) {

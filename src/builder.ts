@@ -40,7 +40,7 @@ export class Builder {
   quote(c: FieldType): Raw {
     if (c instanceof Raw) return c;
     if (c instanceof AttrBuilder) {
-      const [sql, params] = c.build(this);
+      const { sql, params } = c.build(this);
       params && this._params.push(...params);
       return this.raw(sql);
     }
@@ -77,9 +77,11 @@ export class Builder {
   /**
    * append sql
    */
-  append(sql: string | Builder, params: ValueType[] | null = null) {
+  append(sql: string | Builder, params?: ValueType[]) {
     if (sql instanceof Builder) {
-      [sql, params] = sql.build();
+      const b = sql.build();
+      sql = b.sql;
+      params = b.params;
     }
     this._sql.push(sql);
     params && this._params.push(...params);
@@ -107,7 +109,7 @@ export class Builder {
     const _fields: FieldType[] = [];
     const _match = (item:any) => {
       if (item instanceof AttrBuilder) {
-        const [sql, params] = item.build(this);
+        const { sql, params } = item.build(this);
         sql && _fields.push(this.raw(sql));
         params && this._params.push(...params);
         return;
@@ -118,7 +120,7 @@ export class Builder {
           const _value = item[k];
           // { 'asName': [Builder] }
           if (_value instanceof Builder) {
-            const [sql, params] = _value.build();
+            const { sql, params } = _value.build();
             sql && _fields.push(this.as(this.raw(sql), k));
             params && this._params.push(...params);
             return;
@@ -130,7 +132,7 @@ export class Builder {
           }
           // { 'asName': [AttrBuilder] }
           if (_value instanceof AttrBuilder) {
-            const [sql, params] = _value.build(this);
+            const { sql, params } = _value.build(this);
             _fields.push(this.as(this.raw(sql), k));
             params && this._params.push(...params);
             return;
@@ -185,13 +187,15 @@ export class Builder {
     this.append(Object.entries(columns).map(([k, column]) => {
       if (column === undefined) return;
       let _sql: string = '?';
-      let _params: ValueType[] | null = [column];
+      let _params: ValueType[] | undefined = [column];
       if (column instanceof Raw) {
         _sql = column.toString();
-        _params = null;
+        _params = undefined;
       }
       else if (column instanceof AttrBuilder) {
-        [_sql, _params] = column.build(this);
+        const _b = column.build(this);
+        _sql = _b.sql;
+        _params = _b.params;
       }
       _params && this._params.push(..._params);
       return `${this.quote(k)} = ${_sql}`;
@@ -218,9 +222,9 @@ export class Builder {
         return column.toString();
       }
       if (column instanceof AttrBuilder) {
-        const [_sql, _params] = column.build(this);
-        _params && this._params.push(..._params);
-        return _sql;
+        const { sql, params } = column.build(this);
+        params && this._params.push(...params);
+        return sql;
       }
       this._params.push(line[i]);
       return '?';
@@ -279,9 +283,9 @@ export class Builder {
     this.append(joinType);
     this.fields([alias ? this.as(table, alias) : table]);
     const result = this._where(on);
-    if (result && result[0]) {
-      this.append(`ON (${result[0]})`);
-      result[1] && this._params.push(...result[1]);
+    if (result && result.sql) {
+      this.append(`ON (${result.sql})`);
+      result.params && this._params.push(...result.params);
     }
     return this;
   }
@@ -300,10 +304,10 @@ export class Builder {
    */
   where(query: WhereType, prep = 'WHERE', after?: string) {
     const result = this._where(query);
-    if (!result || !result[0]) return this;
+    if (!result || !result.sql) return this;
     prep && this.append(prep);
-    this.append(result[0]);
-    result[1] && this._params.push(...result[1]);
+    this.append(result.sql);
+    result.params && this._params.push(...result.params);
     after && this.append(after);
     return this;
   }
@@ -397,9 +401,9 @@ export class Builder {
     this.append('HAVING');
     if (query) {
       const result = this._where(query);
-      if (result && result[0]) {
-        this.append(result[0]);
-        result[1] && this._params.push(...result[1]);
+      if (result && result.sql) {
+        this.append(result.sql);
+        result.params && this._params.push(...result.params);
       }
     }
     return this;
@@ -409,6 +413,9 @@ export class Builder {
    * @returns sql and params
    */
   build(): BuildResult {
-    return [this._sql.join(' '), this._params];
+    return {
+      sql: this._sql.join(' '),
+      params: this._params,
+    };
   }
 }

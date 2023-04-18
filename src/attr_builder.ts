@@ -3,24 +3,25 @@ import { Raw } from './raw';
 import { template } from './template';
 import { BuildResult, FieldType, SQLTemplateArg } from './types';
 
-export class AttrBuilder {
-  build(builder: Builder): BuildResult {
-    throw new Error('NotImplementedError');
-  }
+export abstract class AttrBuilder {
+  /**
+   * 构建 SQL 结果
+   */
+  abstract build(builder: Builder): BuildResult;
 }
 
 export class Fn extends AttrBuilder {
-  _fn: string;
-  _args: any;
-
-  constructor(fn: string, args?: any) {
+  constructor(
+    private fn: string,
+    private args?: any,
+  ) {
     super();
-    this._fn = fn;
-    this._args = args;
   }
 
-  override build(builder: Builder): BuildResult {
-    return [`${this._fn}(${this._args ? builder.quote(this._args) : ''})`, null];
+  build(builder: Builder) {
+    return {
+      sql: `${this.fn}(${this.args ? builder.quote(this.args) : ''})`,
+    };
   }
 }
 
@@ -61,40 +62,49 @@ export class Op extends AttrBuilder {
     return this;
   }
 
-  override build(builder: Builder): BuildResult {
-    return [
-      this._items.map(i => i instanceof AttrBuilder ? i.build(builder)[0] : i).join(' '),
-      this._params.length ? this._params : null,
-    ];
+  build(builder: Builder): BuildResult {
+    return {
+      sql: this._items.map(i => i instanceof AttrBuilder ? i.build(builder).sql : i).join(' '),
+      params: this._params.length ? this._params : undefined,
+    };
   }
 }
 
 export class Quote extends AttrBuilder {
-  private _col: FieldType;
-
-  constructor(col: FieldType) {
+  constructor(private col: FieldType) {
     super();
-    this._col = col;
   }
 
   override build(builder: Builder): BuildResult {
-    return [builder.quote(this._col).toString(), null];
+    return {
+      sql: builder.quote(this.col).toString(),
+    };
+  }
+}
+
+export class Point extends AttrBuilder {
+  constructor(private x: number, private y: number) {
+    super();
+  }
+
+  build(builder: Builder): BuildResult {
+    return {
+      sql: `ST_GeomFromText('POINT(? ?)')`,
+      params: [this.x, this.y],
+    }
   }
 }
 
 class Template extends AttrBuilder {
-  private _strings: TemplateStringsArray;
-  private _args: SQLTemplateArg[];
-
-  constructor(strings: TemplateStringsArray, args: SQLTemplateArg[]) {
+  constructor(
+    private strings: TemplateStringsArray,
+    private args: SQLTemplateArg[],
+  ) {
     super();
-    this._strings = strings;
-    this._args = args;
   }
 
   override build(builder: Builder): BuildResult {
-    const { sql, params } = template(builder, this._strings, ...this._args);
-    return [sql, params];
+    return template(builder, this.strings, ...this.args);
   }
 }
 
@@ -138,5 +148,8 @@ export const AB = {
   decr(col: string, val?: number) {
     if (typeof val === 'undefined') val = 1;
     return AB.op(AB.quote(col)).op('-', val);
+  },
+  point(x: number, y: number) {
+    return new Point(x, y);
   },
 };

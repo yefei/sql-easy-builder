@@ -1,15 +1,59 @@
 import { Raw } from './raw';
-import { AttrBuilder } from './attr_builder';
 import { Where } from './where';
 import { Builder } from './builder';
+import { AttrBuilder } from './attr_builder';
 
-export type BasicType = string | number | boolean | Date | null;
+/**
+ * 位置类型
+ */
+export type PointType = { x: number, y: number };
+
+/**
+ * 基本类型
+ */
+export type BasicType = string | number | boolean | Date | Buffer | PointType | null;
+
+/**
+ * SQL 模版参数类型
+ */
 export type SQLTemplateArg = Raw | AttrBuilder | BasicType | BasicType[];
+
+/**
+ * 字段类型
+ */
 export type FieldType = Raw | AttrBuilder | string;
+
+/**
+ * 值类型
+ */
 export type ValueType = Raw | AttrBuilder | BasicType;
-export type BuildResult = [sql: string, params: ValueType[] | null];
+
+/**
+ * 行值
+ */
 export type ValueRow = { [column: string]: ValueType };
+
+/**
+ * SQL 构建结果
+ */
+export interface BuildResult {
+  /**
+   * SQL 语句
+   * - 输入参数使用 ? 占位符
+   */
+  sql: string;
+
+  /**
+   * 输入参数
+   */
+  params?: ValueType[];
+}
+
+/**
+ * 查询方法参数
+ */
 export type WhereType = JsonWhere | Where | ((where: Where) => Where);
+
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
 
 interface $Q {

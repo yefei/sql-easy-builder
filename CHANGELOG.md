@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.10.0] - 2023-4-18
+- 新增: PointType, AB.point, Buffer
+- 更新: AttrBuilder 为抽象类
+- 更新: BuildResult 为对象类型
+
 ## [2.9.0] - 2023-3-13
 - fix: JsonWhere 不能设置 null 值问题
 - update: 删除 JsonWhereParam 类型

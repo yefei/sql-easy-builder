@@ -12,9 +12,9 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
   function holder(v: ValueType) {
     if (v instanceof Raw) return v.toString();
     if (v instanceof AttrBuilder) {
-      const [_sql, _params] = v.build(builder);
-      _params && params.push(..._params);
-      return _sql;
+      const b = v.build(builder);
+      b.params && params.push(...b.params);
+      return b.sql;
     }
     params.push(v);
     return '?';
@@ -36,9 +36,9 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
         return;
       }
       if (value instanceof AttrBuilder) {
-        const [_sql, _params] = value.build(builder);
-        sql.push(_sql);
-        _params && params.push(..._params);
+        const b = value.build(builder);
+        sql.push(b.sql);
+        b.params && params.push(...b.params);
         return;
       }
       // $or: [
@@ -49,9 +49,9 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
         const _sql: string[] = [];
         const _params: ValueType[] = [];
         value.forEach(item => {
-          const [_item_sqls, _item_params] = jsonWhere(builder, item);
-          _sql.push(`(${_item_sqls})`);
-          _item_params && _params.push(..._item_params);
+          const b = jsonWhere(builder, item);
+          _sql.push(`(${b.sql})`);
+          b.params && _params.push(...b.params);
         });
         sql.push(_sql.length === 1 ? _sql[0] : `(${_sql.join(` ${_con} `)})`);
         params.push(..._params);
@@ -60,9 +60,9 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
 
       // $or: { f8: 'f8', f9: 'f9' }
       if (isPlainObject(value)) {
-        const [_sqls, _params] = jsonWhere(builder, value, _con);
-        sql.push(`(${_sqls})`);
-        _params && params.push(..._params);
+        const b = jsonWhere(builder, value, _con);
+        sql.push(`(${b.sql})`);
+        b.params && params.push(...b.params);
         return;
       }
       return;
@@ -183,9 +183,9 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
     sql.push(obj.toString());
   }
   else if (obj instanceof AttrBuilder) {
-    const [_sql, _params] = obj.build(builder);
-    sql.push(_sql);
-    _params && params.push(..._params);
+    const b = obj.build(builder);
+    sql.push(b.sql);
+    b.params && params.push(...b.params);
   }
   else if (isPlainObject(obj)) {
     Object.keys(obj).forEach(key => {
@@ -193,7 +193,10 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
     });
   }
 
-  return [sql.join(` ${conjunction} `), params];
+  return {
+    sql: sql.join(` ${conjunction} `),
+    params,
+  };
 }
 
 /*
