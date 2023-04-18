@@ -56,87 +56,94 @@ export type WhereType = JsonWhere | Where | ((where: Where) => Where);
 
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
 
+/**
+ * 不使用
+ * - 可以在 JSON 查询中赋值为 UNSET 删除查询条件
+ */
+export const UNSET = Symbol('unset');
+export type UNSET = typeof UNSET;
+
 interface $Q {
   /** 转译为字段 */
-  $quote?: string;
+  $quote?: string | UNSET;
 
   /** 原始内容拼接入SQL中不做任何处理。 注意：小心SQL注入漏洞 */
-  $raw?: string;
+  $raw?: string | UNSET;
 }
 
 type $Value = ValueType | $Q;
 
 export interface JsonWhereOp extends $Q {
   /** = */
-  $eq?: $Value;
+  $eq?: $Value | UNSET;
 
   /** != */
-  $ne?: $Value;
+  $ne?: $Value | UNSET;
 
   /** \>= */
-  $gte?: $Value;
+  $gte?: $Value | UNSET;
 
   /** \> */
-  $gt?: $Value;
+  $gt?: $Value | UNSET;
 
   /** \<= */
-  $lte?: $Value;
+  $lte?: $Value | UNSET;
 
   /** \< */
-  $lt?: $Value;
+  $lt?: $Value | UNSET;
 
   /** IS */
-  $is?: $Value;
+  $is?: $Value | UNSET;
 
   /** IS NOT */
-  $isnot?: $Value;
+  $isnot?: $Value | UNSET;
 
   /** IS NOT */
-  $not?: $Value;
+  $not?: $Value | UNSET;
 
   /** LIKE */
-  $like?: $Value;
+  $like?: $Value | UNSET;
 
   /** NOT LIKE */
-  $notlike?: $Value;
+  $notlike?: $Value | UNSET;
 
   /** ILIKE */
-  $ilike?: $Value;
+  $ilike?: $Value | UNSET;
 
   /** NOT ILIKE */
-  $notilike?: $Value;
+  $notilike?: $Value | UNSET;
 
   /** REGEXP */
-  $regexp?: $Value;
+  $regexp?: $Value | UNSET;
 
   /** NOT REGEXP */
-  $notregexp?: $Value;
+  $notregexp?: $Value | UNSET;
 
   /** IN */
-  $in?: $Value[],
+  $in?: $Value[] | UNSET,
 
   /** NOT IN */
-  $notin?: $Value[],
+  $notin?: $Value[] | UNSET,
 
   /** BETWEEN [start] AND [end] */
-  $between?: [start: $Value, end: $Value],
+  $between?: [start: $Value, end: $Value] | UNSET,
 
   /** NOT BETWEEN [start] AND [end] */
-  $notbetween?: [start: $Value, end: $Value],
+  $notbetween?: [start: $Value, end: $Value] | UNSET,
 
   /** MATCH(field) AGAINST(value mode) */
   $match?: string | {
     expr: string,
     modifier?: string,
-  },
+  } | UNSET,
 
   // f15: { $or: { $eq: 'f15-1', $gt: 'f15-2', $or: { $eq: 16, $gt: 18 } } },
-  $or?: JsonWhereOp;
-  $and?: JsonWhereOp;
+  $or?: JsonWhereOp | UNSET;
+  $and?: JsonWhereOp | UNSET;
 }
 
 export interface JsonWhere {
-  [field: string]: ValueType | ValueType[] | JsonWhereOp | JsonWhere | JsonWhere[];
+  [field: string]: ValueType | ValueType[] | JsonWhereOp | JsonWhere | JsonWhere[] | UNSET;
 }
 
 /*

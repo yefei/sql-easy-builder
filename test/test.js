@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { Builder, Where, Raw, AB } = require('../dist/index');
+const { Builder, Where, Raw, AB, UNSET } = require('../dist/index');
 const { jsonWhere } = require('../dist/json_where');
 
 function raw(s) { return new Raw(s); }
@@ -553,6 +553,15 @@ describe('Builder', function() {
     assert.deepStrictEqual(q.build(), bs(
       "SELECT `a` FROM `T` WHERE `p` = ST_GeomFromText('POINT(? ?)')",
       [100, 200],
+    ));
+  });
+
+  it("UNSET", function() {
+    const q = new Builder();
+    q.where({ a: 100, b: UNSET });
+    assert.deepStrictEqual(q.build(), bs(
+      "WHERE `a` = ?",
+      [100],
     ));
   });
 });

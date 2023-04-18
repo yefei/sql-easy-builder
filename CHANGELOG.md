@@ -1,5 +1,8 @@
 # Changelog
 
+## [2.11.0] - 2023-4-18
+- 新增: JSON 查询新增 UNSET 类型，可以删除查询条件
+
 ## [2.10.0] - 2023-4-18
 - 新增: PointType, AB.point, Buffer
 - 更新: AttrBuilder 为抽象类

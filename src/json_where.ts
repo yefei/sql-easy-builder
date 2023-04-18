@@ -1,7 +1,7 @@
 import { Builder } from './builder';
 import { isPlainObject } from './utils';
 import { all as operatorMap } from './where_ops';
-import { BuildResult, JsonWhere, ValueType } from './types';
+import { BuildResult, JsonWhere, UNSET, ValueType } from './types';
 import { Raw } from './raw';
 import { AttrBuilder } from './attr_builder';
 
@@ -74,8 +74,11 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
 
   let lastOp: string | null;
   function appendOp(key: string, op: string | null, value: any) {
-    // ignore undefined
+    // throw undefined
     if (value === undefined) throw new Error(`${key} value is undefined`);
+
+    // ignore UNSET
+    if (value === UNSET) return;
 
     if (key === '$or' || key === '$and') {
       return fieldObject(key, value);
