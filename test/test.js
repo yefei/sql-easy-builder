@@ -564,4 +564,13 @@ describe('Builder', function() {
       [100],
     ));
   });
+
+  it("between(1)", function() {
+    const q = new Builder();
+    q.where({ b: { $between: [1] }, c: { $notbetween: [undefined, 2] } });
+    assert.deepStrictEqual(q.build(), bs(
+      "WHERE `b` >= ? AND `c` >= ?",
+      [1, 2],
+    ));
+  });
 });

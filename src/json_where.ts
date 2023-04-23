@@ -135,10 +135,17 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
 
       // between
       if (op === 'between' || op === 'notbetween') {
-        if (value.length !== 2) {
-          throw new TypeError('between or notbetween must be 2 values');
+        if (value[0] && value[1]) {
+          value = `${holder(value[0])} AND ${holder(value[1])}`;
+        } else if (value[0] !== undefined) {
+          op = op === 'notbetween' ? 'lte' : 'gte';
+          value = holder(value[0]);
+        } else if (value[1] !== undefined) {
+          op = op === 'notbetween' ? 'gte' : 'lte';
+          value = holder(value[1]);
+        } else {
+          throw new TypeError('between or notbetween at least one value is required');
         }
-        value = `${holder(value[0])} AND ${holder(value[1])}`;
       }
 
       // [1]
