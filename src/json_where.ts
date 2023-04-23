@@ -135,7 +135,7 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
 
       // between
       if (op === 'between' || op === 'notbetween') {
-        if (value[0] && value[1]) {
+        if (value[0] !== undefined && value[1] !== undefined) {
           value = `${holder(value[0])} AND ${holder(value[1])}`;
         } else if (value[0] !== undefined) {
           op = op === 'notbetween' ? 'lte' : 'gte';
