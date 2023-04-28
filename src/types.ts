@@ -1,7 +1,7 @@
 import { Raw } from './raw';
-import { Where } from './where';
 import { Builder } from './builder';
 import { AttrBuilder } from './attr_builder';
+import { UNSET } from './json_where';
 
 /**
  * 位置类型
@@ -21,7 +21,7 @@ export type SQLTemplateArg = Raw | AttrBuilder | BasicType | BasicType[];
 /**
  * 字段类型
  */
-export type FieldType = Raw | AttrBuilder | string;
+export type FieldType = Raw | AttrBuilder | string | { [as: string]: FieldType };
 
 /**
  * 值类型
@@ -52,16 +52,9 @@ export interface BuildResult {
 /**
  * 查询方法参数
  */
-export type WhereType = JsonWhere | Where | ((where: Where) => Where);
+export type WhereType = JsonWhere;
 
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
-
-/**
- * 不使用
- * - 可以在 JSON 查询中赋值为 UNSET 删除查询条件
- */
-export const UNSET = Symbol('unset');
-export type UNSET = typeof UNSET;
 
 interface $Q {
   /** 转译为字段 */
@@ -126,10 +119,10 @@ export interface JsonWhereOp extends $Q {
   $notin?: $Value[] | UNSET,
 
   /** BETWEEN [start] AND [end] */
-  $between?: [start: $Value, end: $Value] | UNSET,
+  $between?: [start: $Value | undefined, end: $Value | undefined] | UNSET,
 
   /** NOT BETWEEN [start] AND [end] */
-  $notbetween?: [start: $Value, end: $Value] | UNSET,
+  $notbetween?: [start: $Value | undefined, end: $Value | undefined] | UNSET,
 
   /** MATCH(field) AGAINST(value mode) */
   $match?: string | {

@@ -1,4 +1,3 @@
-import { Where } from './where';
 import { AttrBuilder, Op } from './attr_builder';
 import { jsonWhere } from './json_where';
 import { Raw } from './raw';
@@ -57,7 +56,7 @@ export class Builder {
   /**
    * op('views', '+', 100) => views + ?; [100]
    */
-  op(prep: FieldType, op: string, value: string | number | Op) {
+  op(prep: FieldType, op?: string, value?: string | number | Op) {
     const _op = new Op(this.quote(prep));
     if (op && value !== undefined) {
       _op.op(op, value);
@@ -265,11 +264,7 @@ export class Builder {
    */
   private _where(query?: WhereType) {
     let result: BuildResult | undefined;
-    if (typeof query === 'function') {
-      result = query(new Where(this)).build();
-    } else if (query instanceof Where) {
-      result = query.build();
-    } else if (typeof query === 'object') {
+    if (query && typeof query === 'object') {
       result = jsonWhere(this, query);
     }
     return result;
@@ -302,7 +297,7 @@ export class Builder {
    * where({ username: 'test' }) => WHERE username = ?; ['test']
    * where(w => w.eq('username', 'test')) => WHERE username = ?; ['test']
    */
-  where(query: WhereType, prep = 'WHERE', after?: string) {
+  where(query?: WhereType, prep = 'WHERE', after?: string) {
     const result = this._where(query);
     if (!result || !result.sql) return this;
     prep && this.append(prep);
@@ -397,7 +392,7 @@ export class Builder {
   /**
    * having({ count: { $gt: 10 } }) => HAVING count > 10
    */
-  having(query: WhereType) {
+  having(query?: WhereType) {
     this.append('HAVING');
     if (query) {
       const result = this._where(query);

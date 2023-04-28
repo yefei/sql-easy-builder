@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.13.0] - 2023-4-28
+- 删除: class Where 此功能不太常用，没有 jsonWhere 方便，故此删除
+- 更新: symbol UNSET 改为 class UNSET，修正 ts 检查问题
+- 更新: 使用 typescript 重写 test
+
 ## [2.12.0] - 2023-4-23
 - 更新: between 支持单个参数查询
 

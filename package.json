@@ -1,6 +1,6 @@
 {
   "name": "sql-easy-builder",
-  "version": "2.12.2",
+  "version": "2.13.0",
   "description": "SQL easy builder",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,12 +13,13 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "prepublishOnly": "npm run build",
-    "test": "tsc && mocha --enable-source-maps"
+    "test": "tsc && ts-mocha test/test.ts"
   },
   "devDependencies": {
     "@types/node": "^12",
     "mocha": "^8.2.1",
     "rimraf": "^3.0.2",
+    "ts-mocha": "^10.0.0",
     "typescript": "^5.0.4"
   }
 }

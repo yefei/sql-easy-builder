@@ -1,9 +1,16 @@
 import { Builder } from './builder';
 import { isPlainObject } from './utils';
 import { all as operatorMap } from './where_ops';
-import { BuildResult, JsonWhere, UNSET, ValueType } from './types';
+import { BuildResult, JsonWhere, ValueType } from './types';
 import { Raw } from './raw';
 import { AttrBuilder } from './attr_builder';
+
+/**
+ * 不使用标示
+ * - 可以在 JSON 查询中赋值为 UNSET 删除查询条件
+ * - 注意，为了让 TS 检查完美，没有使用 Symbol，index 中导出的 UNSET 为对象实例
+ */
+export class UNSET {};
 
 export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND'): BuildResult {
   const sql: string[] = [];
@@ -78,7 +85,7 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
     if (value === undefined) throw new Error(`${key} value is undefined`);
 
     // ignore UNSET
-    if (value === UNSET) return;
+    if (value instanceof UNSET) return;
 
     if (key === '$or' || key === '$and') {
       return fieldObject(key, value);

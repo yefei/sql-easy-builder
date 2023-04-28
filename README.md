@@ -345,15 +345,3 @@ params:
   1, 2, 38, 39, 1, 2
 ]
 ```
-
-## class where
-```js
-select().from('user').where(w => w
-  .eq('gender', 1)
-  .between('age', 20, 80)
-  .or(w => w
-    .ne('more', 1)
-    .eq('more', 2)
-  )
-)
-```

@@ -1,9 +1,9 @@
-const assert = require('assert');
-const { Builder, Where, Raw, AB, UNSET } = require('../dist/index');
-const { jsonWhere } = require('../dist/json_where');
+import * as assert from "assert";
+import { Builder, Raw, AB, UNSET } from '../src';
+import { jsonWhere } from '../src/json_where';
 
-function raw(s) { return new Raw(s); }
-function bs(sql, params) { return { sql, params } };
+function raw(s: string) { return new Raw(s); }
+function bs(sql: string, params: any) { return { sql, params } };
 
 describe('Builder', function() {
   it('jsonWhere', function() {
@@ -100,6 +100,7 @@ describe('Builder', function() {
     ));
   });
 
+  /*
   it('Where', function() {
     const builder = new Builder();
     assert.deepStrictEqual(new Where(builder).eq('username', 'yf').gte('age', 18).build(), bs(
@@ -107,15 +108,16 @@ describe('Builder', function() {
       ['yf', 18]
     ));
   });
+  */
 
   it('where(invalidity)', function() {
     assert.deepStrictEqual(new Builder().where().build(), bs('', []));
     assert.deepStrictEqual(new Builder().where({}).build(), bs('', []));
-    assert.deepStrictEqual(new Builder().where(null).build(), bs('', []));
-    assert.deepStrictEqual(new Builder().where(new Where()).build(), bs('', []));
+    // assert.deepStrictEqual(new Builder().where(new Where()).build(), bs('', []));
   });
 
   it('where(undefined)', function() {
+    // @ts-ignore
     assert.throws(() => new Builder().where({ a: 1, b: undefined }).build(), Error, 'b value is undefined');
   });
 
@@ -265,7 +267,7 @@ describe('Builder', function() {
 
   it('join', function() {
     const q = new Builder();
-    q.select().from('user').join('profile', null, { 'user.id': q.q('profile.id') });
+    q.select().from('user').join('profile', undefined, { 'user.id': q.q('profile.id') });
 
     assert.deepStrictEqual(q.build(), bs(
       'SELECT * FROM `user` INNER JOIN `profile` ON (`user`.`id` = `profile`.`id`)',
@@ -539,7 +541,7 @@ describe('Builder', function() {
   it("where(Where)", function() {
     const q = new Builder();
     q.select('a').from('T');
-    q.where(new Where(q).eq('test', 1));
+    q.where({ test: 1 });
     assert.deepStrictEqual(q.build(), bs(
       'SELECT `a` FROM `T` WHERE `test` = ?',
       [1],
@@ -558,7 +560,8 @@ describe('Builder', function() {
 
   it("UNSET", function() {
     const q = new Builder();
-    q.where({ a: 100, b: UNSET });
+    const w = { a: 100, b: UNSET };
+    q.where(w);
     assert.deepStrictEqual(q.build(), bs(
       "WHERE `a` = ?",
       [100],
