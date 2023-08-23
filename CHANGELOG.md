@@ -1,5 +1,8 @@
 # Changelog
 
+## [2.14.0] - 2023-8-23
+- 新增: AB.distinctCount
+
 ## [2.13.0] - 2023-4-28
 - 删除: class Where 此功能不太常用，没有 jsonWhere 方便，故此删除
 - 更新: symbol UNSET 改为 class UNSET，修正 ts 检查问题

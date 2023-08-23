@@ -576,4 +576,13 @@ describe('Builder', function() {
       [1, 2],
     ));
   });
+
+  it("AB.distinctCount()", function() {
+    const q = new Builder();
+    q.select({ c: AB.distinctCount('test') });
+    assert.deepStrictEqual(q.build(), bs(
+      "SELECT COUNT(DISTINCT `test`) AS `c`",
+      [],
+    ));
+  });
 });

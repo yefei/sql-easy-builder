@@ -127,6 +127,9 @@ export const AB = {
   count(col = '*') {
     return new Fn('COUNT', col);
   },
+  distinctCount(col: string) {
+    return AB.SQL`COUNT(DISTINCT ${AB.quote(col)})`;
+  },
   avg(col: string) {
     return new Fn('AVG', col);
   },
