@@ -585,4 +585,20 @@ describe('Builder', function() {
       [],
     ));
   });
+
+  it("$and empty item", function() {
+    const q = new Builder();
+    q.where({
+      test: 1,
+      $and: [
+        AB.SQL`2`,
+        AB.SQL`3`,
+        UNSET, // 无效元素产生空 AND () 问题
+      ]
+    });
+    assert.deepStrictEqual(q.build(), bs(
+      "WHERE `test` = ? AND ((2) AND (3))",
+      [1],
+    ));
+  });
 });

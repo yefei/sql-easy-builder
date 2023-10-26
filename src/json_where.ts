@@ -57,6 +57,7 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
         const _params: ValueType[] = [];
         value.forEach(item => {
           const b = jsonWhere(builder, item);
+          if (!b.sql) return;
           _sql.push(`(${b.sql})`);
           b.params && _params.push(...b.params);
         });
