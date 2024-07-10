@@ -259,6 +259,20 @@ export class Builder {
   }
 
   /**
+   * index('a') => USE INDEX (a)
+   */
+  index(name: FieldType, type?: 'USE' | 'FORCE' | 'IGNORE', for_?: 'JOIN' | 'ORDER BY' | 'GROUP BY') {
+    this.append(`${type || 'USE'} INDEX`);
+    if (for_) {
+      this.append(`FOR ${for_}`);
+    }
+    this.append('(');
+    this.fields([name]);
+    this.append(')');
+    return this;
+  }
+
+  /**
    * where({ username: 'test' }) => WHERE username = ?; ['test']
    * where(w => w.eq('username', 'test')) => WHERE username = ?; ['test']
    */

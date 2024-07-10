@@ -601,4 +601,24 @@ describe('Builder', function() {
       [1],
     ));
   });
+
+  it("use index", function() {
+    const q = new Builder();
+    q.from('test');
+    q.index('a');
+    assert.deepStrictEqual(q.build(), bs(
+      "FROM `test` USE INDEX ( `a` )",
+      [],
+    ));
+    q.index('b', 'FORCE');
+    assert.deepStrictEqual(q.build(), bs(
+      "FROM `test` USE INDEX ( `a` ) FORCE INDEX ( `b` )",
+      [],
+    ));
+    q.index('c', 'USE', 'GROUP BY');
+    assert.deepStrictEqual(q.build(), bs(
+      "FROM `test` USE INDEX ( `a` ) FORCE INDEX ( `b` ) USE INDEX FOR GROUP BY ( `c` )",
+      [],
+    ));
+  });
 });
