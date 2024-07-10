@@ -139,6 +139,9 @@ export interface JsonWhere {
   [field: string]: ValueType | ValueType[] | JsonWhereOp | JsonWhere | JsonWhere[] | UNSET;
 }
 
+export type IndexType = 'USE' | 'FORCE' | 'IGNORE';
+export type IndexFor = 'JOIN' | 'ORDER BY' | 'GROUP BY';
+
 /*
 function aaa(j:JsonWhere) {}
 

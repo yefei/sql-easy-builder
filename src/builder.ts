@@ -2,7 +2,7 @@ import { AttrBuilder, Op } from './attr_builder';
 import { jsonWhere } from './json_where';
 import { Raw } from './raw';
 import { template } from './template';
-import { BuildResult, FieldsType, FieldType, SQLTemplateArg, ValueRow, ValueType, WhereType } from './types';
+import { BuildResult, FieldsType, FieldType, IndexFor, IndexType, SQLTemplateArg, ValueRow, ValueType, WhereType } from './types';
 
 function defaultQuote(str: string) {
   return '`' + String(str).replace(/`/g, '``') + '`';
@@ -261,7 +261,7 @@ export class Builder {
   /**
    * index('a') => USE INDEX (a)
    */
-  index(name: FieldType, type?: 'USE' | 'FORCE' | 'IGNORE', for_?: 'JOIN' | 'ORDER BY' | 'GROUP BY') {
+  index(name: string, type?: IndexType, for_?: IndexFor) {
     this.append(`${type || 'USE'} INDEX`);
     if (for_) {
       this.append(`FOR ${for_}`);
