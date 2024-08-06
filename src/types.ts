@@ -34,6 +34,11 @@ export type ValueType = Raw | AttrBuilder | BasicType;
 export type ValueRow = { [column: string]: ValueType };
 
 /**
+ * 排序字段类型
+ */
+export type OrderFieldType = string | Raw | AttrBuilder;
+
+/**
  * SQL 构建结果
  */
 export interface BuildResult {

@@ -1,5 +1,8 @@
 # Changelog
 
+## [2.16.0] - 2024-8-6
+- order() 支持 RAW 和 AttrBuilder
+
 ## [2.15.1] - 2024-7-10
 - index() 类型导出
 

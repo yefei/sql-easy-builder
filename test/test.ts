@@ -621,4 +621,22 @@ describe('Builder', function() {
       [],
     ));
   });
+
+  it("order RAW AB", function() {
+    const q = new Builder();
+    q.from('test');
+    q.order(AB.raw('a IS NULL DESC'));
+    assert.deepStrictEqual(q.build(), bs(
+      "FROM `test` ORDER BY a IS NULL DESC",
+      [],
+    ));
+
+    const q2 = new Builder();
+    q2.from('test');
+    q2.order(AB.raw('a IS NULL DESC'), '-a');
+    assert.deepStrictEqual(q2.build(), bs(
+      "FROM `test` ORDER BY a IS NULL DESC, `a` DESC",
+      [],
+    ));
+  });
 });

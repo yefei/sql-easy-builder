@@ -2,7 +2,7 @@ import { AttrBuilder, Op } from './attr_builder';
 import { jsonWhere } from './json_where';
 import { Raw } from './raw';
 import { template } from './template';
-import { BuildResult, FieldsType, FieldType, IndexFor, IndexType, SQLTemplateArg, ValueRow, ValueType, WhereType } from './types';
+import { BuildResult, FieldsType, FieldType, IndexFor, IndexType, OrderFieldType, SQLTemplateArg, ValueRow, ValueType, WhereType } from './types';
 
 function defaultQuote(str: string) {
   return '`' + String(str).replace(/`/g, '``') + '`';
@@ -384,10 +384,19 @@ export class Builder {
    * order('id') => ORDER BY id ASC
    * order('-id') => ORDER BY id DESC
    * order('-created_at', '-id') => ORDER BY created_at DESC, id DESC
+   * order(AB.raw('created_at IS NULL DESC'), '-created_at') => ORDER BY created_at IS NULL DESC, created_at DESC
    */
-  order(...fields: string[]) {
+  order(...fields: OrderFieldType[]) {
     this.append('ORDER BY');
     this.append(fields.map(f => {
+      if (f instanceof Raw) {
+        return f.toString();
+      }
+      if (f instanceof AttrBuilder) {
+        const { sql, params } = f.build(this);
+        params && this._params.push(...params);
+        return sql;
+      }
       const desc = f[0] === '-';
       return this.quote(desc ? f.substring(1) : f) + (desc ? ' DESC' : ' ASC');
     }).join(', '));
