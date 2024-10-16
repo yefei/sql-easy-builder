@@ -20,7 +20,6 @@ export class JsonWhereBuilder {
   constructor(
     private builder: Builder,
     private where: JsonWhere,
-    private conjunction = 'AND',
   ) {}
 
   private _holder(v: ValueType) {
@@ -74,7 +73,7 @@ export class JsonWhereBuilder {
         for (const item of value) {
           const b = new JsonWhereBuilder(this.builder, item).build();
           if (!b.sql) {
-            return;
+            break;
           }
           _sql.push(`(${b.sql})`);
           if (b.params) {
@@ -88,7 +87,7 @@ export class JsonWhereBuilder {
 
       // $or: { f8: 'f8', f9: 'f9' }
       if (isPlainObject(value)) {
-        const b = new JsonWhereBuilder(this.builder, value, _con).build();
+        const b = new JsonWhereBuilder(this.builder, value)._build(_con);
         this.sql.push(`(${b.sql})`);
         if (b.params) {
           this.params.push(...b.params);
@@ -218,7 +217,10 @@ export class JsonWhereBuilder {
       value = this._holder(value);
     }
 
-    if (op === null) op = 'eq';
+    if (op === null) {
+      op = 'eq';
+    }
+
     if (!(op in operatorMap)) {
       throw new TypeError(`Unknown operator: ${op}`);
     }
@@ -226,7 +228,7 @@ export class JsonWhereBuilder {
     this.sql.push(`${this.builder.quote(key)} ${operatorMap[op]} ${value}`);
   }
 
-  build(): BuildResult {
+  private _build(conjunction = 'AND'): BuildResult {
     if (this.where instanceof Raw) {
       this.sql.push(this.where.toString());
     }
@@ -244,83 +246,12 @@ export class JsonWhereBuilder {
     }
 
     return {
-      sql: this.sql.join(` ${this.conjunction} `),
+      sql: this.sql.join(` ${conjunction} `),
       params: this.params,
     };
   }
-}
 
-/*
-const builder = new (require('./builder'))();
-const test = {
-  f1: 'f1',
-  f2: { $gt: 'f2-gt', $lt: 'f2-lt', $in: ['f2-in-1', 'f2-in-2'], $eq: new Raw('f2-raw') },
-  f3: ['f3-1', 'f3-2'],
-  f4: ['f4'],
-  f5: [],
-  f6: new Raw('f6'),
-  f7: { $between: ['f7-1', 'f7-2'] },
-  $or: { f8: 'f8', f9: 'f9' },
-  // $or: { f8: 'f8' },
-  // $or: [
-  //   { f8: 'f8' },
-  //   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
-  // ],
-  f14: null,
-  f15: { $or: { $eq: 'f15-1', $gt: 'f15-2', $or: { $eq: 16, $gt: 18 } } },
-  f16: new Date(),
-  f17: { f18: 'f17.f18', f19: { f20: { $gt: 'f20' } } },
-  f21: {
-    f22: 'f22',
-    $or: {
-      f23: 'f23',
-      f24: 'f24',
-    }
-  },
-  f25: {
-    f26: 'f26',
-    $or: [
-      { f27: 'f27', f28: 'f28' },
-      { f29: 'f29', f30: 'f30' },
-    ]
-  },
-  // quote
-  f31: { $quote: 'f31' },
-  f32: { $gt: { $quote: 'f32' } },
-  // raw
-  f33: { $raw: 'f33' },
-  f34: { $gt: { $raw: 'f34' } },
-  // quote and raw
-  f35: { $lt: { $raw: 'f35-r', $quote: 'f35-q' } },
-  // and
-  $and: [
-    { f36: { $ne: 1 } },
-    { f36: { $ne: 2 } },
-  ],
-  f37: {
-    $and: { f38: 38, f39: 39 },
-  },
-  f40: {
-    $and: [
-      { f41: { $ne: 1 } },
-      { f41: { $ne: 2 } },
-    ]
-  },
-};
-console.log(jsonWhere(builder, test));
-*/
-
-/*
-const builder = new Builder();
-console.log(jsonWhere(builder, {
-  a: 1,
-  $and: [
-    { $or: { b: 1, c: 2 } },
-    { $or: { d: 1, e: 2 } },
-  ],
-  b: {
-    $match: { expr: 'kkk', modifier: 'IN BOOLEAN MODE' },
-    d: { $match: 'aaa bbb' }
+  build() {
+    return this._build();
   }
-}));
-*/
+}

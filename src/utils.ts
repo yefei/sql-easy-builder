@@ -1,13 +1,5 @@
-export function isPlainObject(obj: any): boolean {
-  if (!obj || typeof obj !== 'object') {
-    return false;
-  }
-  if (Object.getPrototypeOf(obj) === null) {
-    return true;
-  }
-  let proto = obj;
-  while (Object.getPrototypeOf(proto) !== null) {
-    proto = Object.getPrototypeOf(proto);
-  }
-  return Object.getPrototypeOf(obj) === proto;
+export function isPlainObject(obj: unknown) {
+  return typeof obj === 'object'
+    && obj !== null 
+    && Object.getPrototypeOf(obj) === Object.prototype;
 }

@@ -14,6 +14,7 @@
   "scripts": {
     "build": "rimraf dist && tsc",
     "prepack": "npm run build",
+    "t1": "node --loader=ts-node/esm test/t1.ts",
     "test": "mocha --loader=ts-node/esm test/test.ts"
   },
   "devDependencies": {
