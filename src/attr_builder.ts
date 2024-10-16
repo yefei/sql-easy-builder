@@ -1,7 +1,7 @@
-import { Builder } from './builder';
-import { Raw } from './raw';
-import { template } from './template';
-import { BuildResult, FieldType, SQLTemplateArg } from './types';
+import { Builder } from './builder.js';
+import { Raw } from './raw.js';
+import { template } from './template.js';
+import { BuildResult, FieldType, SQLTemplateArg } from './types.js';
 
 export abstract class AttrBuilder {
   /**

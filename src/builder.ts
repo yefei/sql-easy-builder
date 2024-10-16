@@ -1,8 +1,8 @@
-import { AttrBuilder, Op } from './attr_builder';
-import { jsonWhere } from './json_where';
-import { Raw } from './raw';
-import { template } from './template';
-import { BuildResult, FieldsType, FieldType, IndexFor, IndexType, OrderFieldType, SQLTemplateArg, ValueRow, ValueType, WhereType } from './types';
+import { AttrBuilder, Op } from './attr_builder.js';
+import { JsonWhereBuilder } from './json_where.js';
+import { Raw } from './raw.js';
+import { template } from './template.js';
+import { BuildResult, FieldsType, FieldType, IndexFor, IndexType, OrderFieldType, SQLTemplateArg, ValueRow, ValueType, WhereType } from './types.js';
 
 function defaultQuote(str: string) {
   return '`' + String(str).replace(/`/g, '``') + '`';
@@ -279,7 +279,7 @@ export class Builder {
   private _where(query?: WhereType) {
     let result: BuildResult | undefined;
     if (query && typeof query === 'object') {
-      result = jsonWhere(this, query);
+      result = new JsonWhereBuilder(this, query).build();
     }
     return result;
   }

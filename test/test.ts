@@ -1,9 +1,13 @@
-import * as assert from "assert";
-import { Builder, Raw, AB, UNSET } from '../src';
-import { jsonWhere } from '../src/json_where';
+import assert from "assert";
+import { Builder, Raw, AB, UNSET, JsonWhere } from '../src/index.js';
+import { JsonWhereBuilder } from '../src/json_where.js';
 
 function raw(s: string) { return new Raw(s); }
 function bs(sql: string, params: any) { return { sql, params } };
+
+function jsonWhere(builder: Builder, where: JsonWhere) {
+  return new JsonWhereBuilder(builder, where).build();
+}
 
 describe('Builder', function() {
   it('jsonWhere', function() {

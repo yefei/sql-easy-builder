@@ -1,9 +1,9 @@
-import { Builder } from './builder';
-import { isPlainObject } from './utils';
-import { all as operatorMap } from './where_ops';
-import { BuildResult, JsonWhere, ValueType } from './types';
-import { Raw } from './raw';
-import { AttrBuilder } from './attr_builder';
+import { Builder } from './builder.js';
+import { isPlainObject } from './utils.js';
+import { all as operatorMap } from './where_ops.js';
+import { BuildResult, JsonWhere, ValueType } from './types.js';
+import { Raw } from './raw.js';
+import { AttrBuilder } from './attr_builder.js';
 
 /**
  * 不使用标示
@@ -12,18 +12,29 @@ import { AttrBuilder } from './attr_builder';
  */
 export class UNSET {};
 
-export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND'): BuildResult {
-  const sql: string[] = [];
-  const params: ValueType[] = [];
+export class JsonWhereBuilder {
+  private sql: string[] = [];
+  private params: ValueType[] = [];
+  private lastOp: string | null = null;
 
-  function holder(v: ValueType) {
-    if (v instanceof Raw) return v.toString();
+  constructor(
+    private builder: Builder,
+    private where: JsonWhere,
+    private conjunction = 'AND',
+  ) {}
+
+  private _holder(v: ValueType) {
+    if (v instanceof Raw) {
+      return v.toString();
+    }
     if (v instanceof AttrBuilder) {
-      const b = v.build(builder);
-      b.params && params.push(...b.params);
+      const b = v.build(this.builder);
+      if (b.params) {
+        this.params.push(...b.params);
+      }
       return b.sql;
     }
-    params.push(v);
+    this.params.push(v);
     return '?';
   }
 
@@ -35,19 +46,24 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
    *   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
    * ]
    */
-  function fieldObject(key: string, value: any) {
+  private _fieldObject(key: string, value: any) {
     if (key === '$or' || key === '$and') {
       const _con = key.substring(1).toUpperCase();
+
       if (value instanceof Raw) {
-        sql.push(value.toString());
+        this.sql.push(value.toString());
         return;
       }
+
       if (value instanceof AttrBuilder) {
-        const b = value.build(builder);
-        sql.push(b.sql);
-        b.params && params.push(...b.params);
+        const b = value.build(this.builder);
+        this.sql.push(b.sql);
+        if (b.params) {
+          this.params.push(...b.params);
+        }
         return;
       }
+
       // $or: [
       //   { f8: 'f8' },
       //   { f9: 'f9', f10: 'f10', $or: { f12: 'f12', f13: 'f13' } },
@@ -55,33 +71,40 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
       if (Array.isArray(value) && value.length > 0) {
         const _sql: string[] = [];
         const _params: ValueType[] = [];
-        value.forEach(item => {
-          const b = jsonWhere(builder, item);
-          if (!b.sql) return;
+        for (const item of value) {
+          const b = new JsonWhereBuilder(this.builder, item).build();
+          if (!b.sql) {
+            return;
+          }
           _sql.push(`(${b.sql})`);
-          b.params && _params.push(...b.params);
-        });
-        sql.push(_sql.length === 1 ? _sql[0] : `(${_sql.join(` ${_con} `)})`);
-        params.push(..._params);
+          if (b.params) {
+            _params.push(...b.params);
+          }
+        }
+        this.sql.push(_sql.length === 1 ? _sql[0] : `(${_sql.join(` ${_con} `)})`);
+        this.params.push(..._params);
         return;
       }
 
       // $or: { f8: 'f8', f9: 'f9' }
       if (isPlainObject(value)) {
-        const b = jsonWhere(builder, value, _con);
-        sql.push(`(${b.sql})`);
-        b.params && params.push(...b.params);
+        const b = new JsonWhereBuilder(this.builder, value, _con).build();
+        this.sql.push(`(${b.sql})`);
+        if (b.params) {
+          this.params.push(...b.params);
+        }
         return;
       }
+
       return;
     }
-    Object.keys(value).forEach(op => {
-      appendOp(key, op, value[op]);
-    });
+
+    for (const op of Object.keys(value)) {
+      this._appendOp(key, op, value[op]);
+    }
   }
 
-  let lastOp: string | null;
-  function appendOp(key: string, op: string | null, value: any) {
+  private _appendOp(key: string, op: string | null, value: any) {
     // throw undefined
     if (value === undefined) throw new Error(`${key} value is undefined`);
 
@@ -89,7 +112,7 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
     if (value instanceof UNSET) return;
 
     if (key === '$or' || key === '$and') {
-      return fieldObject(key, value);
+      return this._fieldObject(key, value);
     }
 
     // $op | key.key
@@ -110,17 +133,17 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
       }
       // f15: { $or: [ { f27: 'f27', f28: 'f28' }, { f29: 'f29', f30: 'f30' } ] }
       if (Array.isArray(value)) {
-        fieldObject('$' + op, value.map(item => ({ [key]: item })));
+        this._fieldObject('$' + op, value.map(item => ({ [key]: item })));
       }
       return;
     }
     else if (op === 'quote') {
-      op = lastOp || null;
-      value = builder.quote(value);
+      op = this.lastOp || null;
+      value = this.builder.quote(value);
     }
     else if (op === 'raw') {
-      op = lastOp || null;
-      value = builder.raw(value);
+      op = this.lastOp || null;
+      value = this.builder.raw(value);
     }
     else if (op === 'match') {
       let modifier = '';
@@ -130,7 +153,7 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
         }
         value = value.expr;
       }
-      sql.push(`MATCH(${builder.quote(key)}) AGAINST(${holder(value)}${modifier})`);
+      this.sql.push(`MATCH(${this.builder.quote(key)}) AGAINST(${this._holder(value)}${modifier})`);
       return;
     }
 
@@ -144,13 +167,13 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
       // between
       if (op === 'between' || op === 'notbetween') {
         if (value[0] !== undefined && value[1] !== undefined) {
-          value = `${holder(value[0])} AND ${holder(value[1])}`;
+          value = `${this._holder(value[0])} AND ${this._holder(value[1])}`;
         } else if (value[0] !== undefined) {
           op = op === 'notbetween' ? 'lte' : 'gte';
-          value = holder(value[0]);
+          value = this._holder(value[0]);
         } else if (value[1] !== undefined) {
           op = op === 'notbetween' ? 'gte' : 'lte';
-          value = holder(value[1]);
+          value = this._holder(value[1]);
         } else {
           throw new TypeError('between or notbetween at least one value is required');
         }
@@ -161,15 +184,21 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
 
       // [1, 2, ...]
       else {
-        value = `(${value.map(i => holder(i)).join(', ')})`;
-        if (op === null) op = 'in';
+        value = `(${value.map(i => this._holder(i)).join(', ')})`;
+        if (op === null) {
+          op = 'in';
+        }
       }
     }
 
     // f11: null
     else if (value === null) {
-      if (op === null || op === 'eq') op = 'is';
-      else if (op === 'ne') op = 'isnot';
+      if (op === null || op === 'eq') {
+        op = 'is';
+      }
+      else if (op === 'ne') {
+        op = 'isnot';
+      }
       value = 'NULL';
     }
 
@@ -180,13 +209,13 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
       // lastOp:   👇
       //   f32: { $gt: { $quote: 'f32' } },
       //   f33: { $gt: { $raw: 'f33' } },
-      lastOp = op;
-      return fieldObject(key, value);
+      this.lastOp = op;
+      return this._fieldObject(key, value);
     }
 
     // f2: 1
     else {
-      value = holder(value);
+      value = this._holder(value);
     }
 
     if (op === null) op = 'eq';
@@ -194,27 +223,31 @@ export function jsonWhere(builder: Builder, obj: JsonWhere, conjunction = 'AND')
       throw new TypeError(`Unknown operator: ${op}`);
     }
 
-    sql.push(`${builder.quote(key)} ${operatorMap[op]} ${value}`);
+    this.sql.push(`${this.builder.quote(key)} ${operatorMap[op]} ${value}`);
   }
 
-  if (obj instanceof Raw) {
-    sql.push(obj.toString());
-  }
-  else if (obj instanceof AttrBuilder) {
-    const b = obj.build(builder);
-    sql.push(b.sql);
-    b.params && params.push(...b.params);
-  }
-  else if (isPlainObject(obj)) {
-    Object.keys(obj).forEach(key => {
-      appendOp(key, null, obj[key]);
-    });
-  }
+  build(): BuildResult {
+    if (this.where instanceof Raw) {
+      this.sql.push(this.where.toString());
+    }
+    else if (this.where instanceof AttrBuilder) {
+      const b = this.where.build(this.builder);
+      this.sql.push(b.sql);
+      if (b.params) {
+        this.params.push(...b.params);
+      }
+    }
+    else if (isPlainObject(this.where)) {
+      for (const key of Object.keys(this.where)) {
+        this._appendOp(key, null, this.where[key]);
+      }
+    }
 
-  return {
-    sql: sql.join(` ${conjunction} `),
-    params,
-  };
+    return {
+      sql: this.sql.join(` ${this.conjunction} `),
+      params: this.params,
+    };
+  }
 }
 
 /*

@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.0.0] - 2024-10-16
+- ESM
+- 重写 jsonWhere 方法
+
 ## [2.16.0] - 2024-8-6
 - order() 支持 RAW 和 AttrBuilder
 

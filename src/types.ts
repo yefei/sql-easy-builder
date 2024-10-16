@@ -1,7 +1,7 @@
-import { Raw } from './raw';
-import { Builder } from './builder';
-import { AttrBuilder } from './attr_builder';
-import { UNSET } from './json_where';
+import { Raw } from './raw.js';
+import { Builder } from './builder.js';
+import { AttrBuilder } from './attr_builder.js';
+import { UNSET } from './json_where.js';
 
 /**
  * 位置类型

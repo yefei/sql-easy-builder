@@ -1,7 +1,7 @@
-import { AttrBuilder } from './attr_builder';
-import { SQLTemplateArg } from './types';
-import { Builder } from './builder';
-import { Raw } from './raw';
+import { AttrBuilder } from './attr_builder.js';
+import { SQLTemplateArg } from './types.js';
+import { Builder } from './builder.js';
+import { Raw } from './raw.js';
 
 const quoteRe = /\{([\w_.]+)\}/g;
 
