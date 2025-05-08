@@ -274,12 +274,17 @@ export class Builder {
 
   /**
    * where({ username: 'test' }) => WHERE username = ?; ['test']
-   * where(w => w.eq('username', 'test')) => WHERE username = ?; ['test']
+   * where(AB)
    */
   private _where(query?: WhereType) {
     let result: BuildResult | undefined;
-    if (query && typeof query === 'object') {
-      result = new JsonWhereBuilder(this, query).build();
+    if (query) {
+      if (query instanceof AttrBuilder) {
+        result = query.build(this);
+      }
+      else if (typeof query === 'object') {
+        result = new JsonWhereBuilder(this, query).build();
+      }
     }
     return result;
   }

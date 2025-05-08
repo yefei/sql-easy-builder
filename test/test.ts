@@ -383,6 +383,15 @@ describe('Builder', function() {
     ));
   });
 
+  it("having(ab)", function() {
+    const q = new Builder();
+    q.having(AB.SQL`COUNT({a}) = 1`);
+    assert.deepStrictEqual(q.build(), bs(
+      'HAVING COUNT(`a`) = 1',
+      [],
+    ));
+  });
+
   it("SQL`IN`", function() {
     const q = new Builder();
     q.SQL`A in (${[1,2,3]})`;

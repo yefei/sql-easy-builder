@@ -57,7 +57,7 @@ export interface BuildResult {
 /**
  * 查询方法参数
  */
-export type WhereType = JsonWhere;
+export type WhereType = JsonWhere | AttrBuilder;
 
 export type FieldsType = (FieldType | { [key: string]: FieldType | FieldType[] | Builder })[];
 

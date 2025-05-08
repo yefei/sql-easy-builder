@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.1.0] - 2025-5-8
+- WhereType 支持 AttrBuilder
+
 ## [3.0.0] - 2024-10-16
 - ESM
 - 重写 jsonWhere 方法
